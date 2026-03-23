@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { HC } from '../constants/colors';
 import { habitabilityComponents, HAB_LABEL, HAB_COLOR } from '../utils/phi';
 import { rdLabel, rdColor } from '../utils/glicko2';
@@ -24,18 +24,9 @@ const PLANET_TYPE_DESCRIPTIONS = {
 
 export default function PlanetDetail({planet, onBack, voted, userMode}) {
   const isAdvanced = userMode === "advanced";
-  const [analysis,setAnalysis]=useState("");
-  const [loading,setLoading]=useState(false);
-  const [fetched,setFetched]=useState(false);
   const c=HC[planet.hue]||HC.blue;
   const hc=habitabilityComponents(planet);
   const habColor=HAB_COLOR(hc.total);
-  useEffect(()=>{
-    if (!isAdvanced || !voted) return; // briefs are advanced + voted-only
-    if(fetched)return;setFetched(true);setLoading(true);
-    fetch("/api/brief",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({planet})})
-      .then(r=>r.json()).then(d=>setAnalysis(d.text||"Unavailable.")).catch(()=>setAnalysis("Analysis unavailable.")).finally(()=>setLoading(false));
-  },[planet.id, isAdvanced]);
   return (
     <div style={{maxWidth:740,margin:"0 auto"}}>
       <button onClick={onBack} style={{background:"transparent",border:"0.5px solid rgba(255,255,255,0.15)",color:"rgba(255,255,255,0.45)",padding:"7px 14px",borderRadius:6,fontFamily:"'Space Mono',monospace",fontSize:10,cursor:"pointer",marginBottom:24,letterSpacing:"0.1em"}}>← BACK</button>
@@ -120,21 +111,6 @@ export default function PlanetDetail({planet, onBack, voted, userMode}) {
         </div>
       ))}
 
-      {/* Scientific brief - advanced only */}
-      {isAdvanced && (voted ? (
-        <div style={{background:"rgba(5,12,20,0.82)",border:"0.5px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"24px 28px"}}>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:18}}><div style={{width:5,height:5,borderRadius:"50%",background:c.accent,boxShadow:`0 0 7px ${c.accent}`}}/><div style={{fontFamily:"'Orbitron',sans-serif",fontSize:10,color:c.accent,letterSpacing:"0.15em"}}>SCIENTIFIC BRIEF</div></div>
-          {loading
-            ?<div style={{display:"flex",flexDirection:"column",gap:9}}>{[100,86,92].map((w,i)=><div key={i} style={{height:12,width:`${w}%`,background:"rgba(255,255,255,0.05)",borderRadius:3,animation:"shimmer 1.5s ease-in-out infinite"}}/>)}<div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.25)",marginTop:6}}>Generating...</div></div>
-            :<div>{analysis.split("\n\n").filter(Boolean).map((p,i)=><p key={i} style={{fontFamily:"'Crimson Pro',serif",fontSize:15,lineHeight:1.8,color:"rgba(255,255,255,0.72)",marginBottom:14,marginTop:0}}>{p}</p>)}</div>
-          }
-        </div>
-      ) : (
-        <div style={{background:"rgba(5,12,20,0.6)",border:"0.5px solid rgba(255,255,255,0.08)",borderRadius:16,padding:"22px 28px",textAlign:"center"}}>
-          <div style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.25)",letterSpacing:"0.15em",marginBottom:8}}>SCIENTIFIC BRIEF · LOCKED</div>
-          <div style={{fontFamily:"'Crimson Pro',serif",fontSize:14,color:"rgba(255,255,255,0.3)",fontStyle:"italic"}}>Vote on this planet in a matchup to unlock the scientific brief.</div>
-        </div>
-      ))}
     </div>
   );
 }
