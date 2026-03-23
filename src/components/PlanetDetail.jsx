@@ -8,18 +8,18 @@ import ScoreBar from './primitives/ScoreBar';
 
 // ─── PLANET TYPE DESCRIPTIONS (beginner plain-language) ──────────────────────
 const PLANET_TYPE_DESCRIPTIONS = {
-  "Earth-size":    "A planet close to Earth's size. Rocky surface is likely, making these the most promising candidates for liquid water and potentially life.",
-  "Super-Earth":   "Larger than Earth but smaller than Neptune. Could be rocky with a thick atmosphere, or a water world. Scientists are not yet sure which.",
-  "Mini-Neptune":  "Smaller than Neptune but probably has a thick gas envelope. Unlikely to have a solid surface we could land on.",
-  "Neptune-like":  "Similar in size to our Neptune, so likely a gas or ice giant with no solid surface. Interesting for atmospheric chemistry but not a habitability candidate.",
-  "Gas Giant":     "A massive planet made mostly of gas, like Jupiter or Saturn. Too hostile for life as we know it, but useful as an atmospheric benchmark.",
-  "Hot Jupiter":   "A giant gas planet orbiting so close to its star that surface temperatures exceed those of some stars. Scientifically fascinating but almost certainly lifeless.",
-  "Hot Saturn":    "Like a Hot Jupiter but slightly smaller - a puffy gas giant blasted by its star. JWST can study its atmosphere in detail.",
-  "Lava World":    "A rocky planet so close to its star that its surface is likely molten. Extreme temperatures make it uninhabitable but scientifically extreme.",
-  "Hycean":        "A theorised class of ocean-covered world with a hydrogen-rich atmosphere. Could potentially support microbial life.",
-  "Pulsar Planet": "A planet orbiting the remnant of an exploded star. The radiation environment is lethal, but this is historically important as the first exoplanet ever confirmed.",
-  "Sub-Earth":     "Smaller than Earth, likely rocky. Too small to hold onto much atmosphere, similar to Mars.",
-  "Temperate":     "A planet in the right temperature range for liquid water to exist on the surface, which is one of the most important criteria when searching for habitable worlds.",
+  "Earth-size":      "A planet close to Earth's size. Rocky surface is likely, making these the most promising candidates for liquid water and potentially life.",
+  "Super-Earth":     "Larger than Earth but smaller than Neptune. Could be rocky with a thick atmosphere, or a water world. Scientists are not yet sure which.",
+  "Hycean World":    "A theorised class of ocean-covered world with a hydrogen-rich atmosphere. Could potentially support microbial life even under conditions hostile to land-based organisms.",
+  "Sub-Neptune":     "Smaller than Neptune but bigger than Earth, likely wrapped in a thick hydrogen or water-vapour envelope. Probably no solid surface, but one of the most common planet types found by Kepler.",
+  "Hot Sub-Neptune": "A Sub-Neptune orbiting very close to its star. The intense heat puffs up its atmosphere, making it easier for JWST to study — but habitability is essentially zero.",
+  "Hot Neptune":     "A Neptune-sized planet baking in the heat of a close orbit. Rare in the galaxy, possibly because the stellar radiation strips away the atmosphere over time.",
+  "Ice Giant":       "A cold, distant world made mostly of water, ammonia, and methane ices beneath a thick gas envelope — similar to Uranus or Neptune in our solar system.",
+  "Gas Giant":       "A massive planet made mostly of gas, like Jupiter or Saturn. Too hostile for life as we know it, but useful as an atmospheric chemistry benchmark for JWST.",
+  "Hot Saturn":      "A puffy gas giant baked by its nearby star. Its bloated, low-density atmosphere is one of the easiest targets for transmission spectroscopy with JWST.",
+  "Hot Jupiter":     "A giant gas planet orbiting so close to its star that surface temperatures exceed those of some stars. Scientifically fascinating but almost certainly lifeless.",
+  "Lava World":      "A rocky planet so close to its star that its surface is likely entirely molten. Extreme temperatures make it uninhabitable but scientifically extreme.",
+  "Cold Jupiter":    "A Jupiter-sized gas giant in a wide, cold orbit — similar to our own Jupiter. Rarely transits its star, so hard to study, but important for understanding solar system formation.",
 };
 
 export default function PlanetDetail({planet, onBack, voted, userMode}) {
