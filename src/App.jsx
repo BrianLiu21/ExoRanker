@@ -134,6 +134,7 @@ export default function App() {
       setStage("quiz");
     } else {
       saveLocal("er_user1", u);
+      sb.upsert("users", u);
       setStage("app");
     }
   };
