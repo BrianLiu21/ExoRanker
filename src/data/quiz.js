@@ -99,9 +99,17 @@ export const QUESTION_BANK = [
 // Build a randomized quiz: 3 tier-1, 3 tier-2, 2 tier-3 questions
 export function buildQuiz() {
   const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
-  const t1 = shuffle(QUESTION_BANK.filter(q => q.tier === 1)).slice(0, 3);
-  const t2 = shuffle(QUESTION_BANK.filter(q => q.tier === 2)).slice(0, 3);
-  const t3 = shuffle(QUESTION_BANK.filter(q => q.tier === 3)).slice(0, 2);
+
+  // Shuffle answer options and update correct index to match
+  const shuffleOpts = q => {
+    const tagged = q.opts.map((opt, i) => ({ opt, isCorrect: i === q.correct }));
+    const shuffled = shuffle(tagged);
+    return { ...q, opts: shuffled.map(x => x.opt), correct: shuffled.findIndex(x => x.isCorrect) };
+  };
+
+  const t1 = shuffle(QUESTION_BANK.filter(q => q.tier === 1)).slice(0, 3).map(shuffleOpts);
+  const t2 = shuffle(QUESTION_BANK.filter(q => q.tier === 2)).slice(0, 3).map(shuffleOpts);
+  const t3 = shuffle(QUESTION_BANK.filter(q => q.tier === 3)).slice(0, 2).map(shuffleOpts);
   return [...t1, ...t2, ...t3]; // ordered easy → hard
 }
 
