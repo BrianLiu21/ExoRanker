@@ -22,7 +22,7 @@ export default function AccuracyToast({result, onDismiss}) {
       </div>
       {isTie ? (
         <div style={{fontFamily:"'Crimson Pro',serif",fontSize:13,color:"rgba(255,255,255,0.4)",fontStyle:"italic",marginBottom:8}}>
-          PHI gap between these planets is under 5pts - too close to call. Vote counts toward ELO rankings but not your accuracy score.
+          PHI gap between these planets is under 8pts - too close to call. Vote counts toward ELO rankings but not your accuracy score.
         </div>
       ) : (
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
