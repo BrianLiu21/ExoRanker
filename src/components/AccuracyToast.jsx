@@ -8,7 +8,7 @@ export default function AccuracyToast({result, onDismiss, onViewDetail}) {
   const label=isTie?"INDETERMINATE PAIR":result.correct?"CORRECT CALL":"MISSED";
   const newStreakInfo = result.streakInfo;
   return (
-    <div style={{position:"fixed",bottom:28,left:"50%",transform:"translateX(-50%)",zIndex:200,background:isTie?"rgba(10,10,18,0.97)":result.correct?"rgba(4,22,14,0.97)":"rgba(22,4,4,0.97)",border:`1px solid ${labelColor}`,borderRadius:12,padding:"16px 22px",minWidth:340,maxWidth:460,boxShadow:"0 12px 40px rgba(0,0,0,0.6)"}}>
+    <div style={{position:"fixed",bottom:28,left:"50%",transform:"translateX(-50%)",zIndex:200,background:isTie?"rgba(10,10,18,0.97)":result.correct?"rgba(4,22,14,0.97)":"rgba(22,4,4,0.97)",border:`1px solid ${labelColor}`,borderRadius:12,padding:isTie?"12px 18px":"10px 16px",minWidth:320,maxWidth:isTie?400:480,boxShadow:"0 12px 40px rgba(0,0,0,0.6)"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:isTie?6:12}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:11,color:labelColor,letterSpacing:"0.12em",fontWeight:700}}>{label}</div>
@@ -32,18 +32,18 @@ export default function AccuracyToast({result, onDismiss, onViewDetail}) {
             const hc=phiComponents(p);
             const col=HAB_COLOR(hc.total);
             return (
-              <div key={p.id} onClick={()=>{ onViewDetail?.(p); onDismiss(); }} style={{background:"rgba(0,0,0,0.35)",borderRadius:8,padding:"10px 12px",border:`0.5px solid ${isCorrect?"#1D9E7566":"rgba(255,255,255,0.08)"}`,cursor:"pointer"}}>
-                <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:8,color:isCorrect?"#1D9E75":"rgba(255,255,255,0.5)",marginBottom:4,letterSpacing:"0.04em",lineHeight:1.3}}>
+              <div key={p.id} onClick={()=>{ onViewDetail?.(p); onDismiss(); }} style={{background:"rgba(0,0,0,0.35)",borderRadius:8,padding:"7px 10px",border:`0.5px solid ${isCorrect?"#1D9E7566":"rgba(255,255,255,0.08)"}`,cursor:"pointer"}}>
+                <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:7,color:isCorrect?"#1D9E75":"rgba(255,255,255,0.5)",marginBottom:3,letterSpacing:"0.04em",lineHeight:1.3}}>
                   {p.name}{isCorrect?" ✓":""}{isChosen&&!isCorrect?" ← your pick":""}
                 </div>
-                <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:18,fontWeight:900,color:col}}>{Math.round(hc.total*100)}<span style={{fontSize:9,opacity:0.5}}>/100</span></div>
-                <div style={{fontFamily:"'Space Mono',monospace",fontSize:7,color:"rgba(255,255,255,0.3)",marginBottom:6}}>{HAB_LABEL(hc.total)}</div>
-                <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:col}}>{Math.round(hc.total*100)}<span style={{fontSize:8,opacity:0.5}}>/100</span></div>
+                <div style={{fontFamily:"'Space Mono',monospace",fontSize:7,color:"rgba(255,255,255,0.3)",marginBottom:4}}>{HAB_LABEL(hc.total)}</div>
+                <div style={{display:"flex",flexDirection:"column",gap:2}}>
                   {[["HZ",hc.hz,"#1D9E75"],["Rocky",hc.rk,"#378ADD"],["Tidal",hc.tl,"#7F77DD"],["Activity",hc.act,"#EF9F27"],["Atm",hc.atm,"#B5D4F4"],["ESI",hc.esi,"#9FE1CB"],["Obs",hc.obs,"#888780"]].map(([l,v,c])=>(
-                    <div key={l} style={{display:"flex",alignItems:"center",gap:5}}>
-                      <span style={{fontFamily:"'Space Mono',monospace",fontSize:7,color:"rgba(255,255,255,0.3)",width:28,flexShrink:0}}>{l}</span>
+                    <div key={l} style={{display:"flex",alignItems:"center",gap:4}}>
+                      <span style={{fontFamily:"'Space Mono',monospace",fontSize:6,color:"rgba(255,255,255,0.3)",width:26,flexShrink:0}}>{l}</span>
                       <div style={{flex:1,height:2,background:"rgba(255,255,255,0.08)",borderRadius:1}}><div style={{width:`${Math.round(v*100)}%`,height:"100%",background:c,borderRadius:1}}/></div>
-                      <span style={{fontFamily:"'Space Mono',monospace",fontSize:7,color:"rgba(255,255,255,0.4)",width:20,textAlign:"right",flexShrink:0}}>{Math.round(v*100)}</span>
+                      <span style={{fontFamily:"'Space Mono',monospace",fontSize:6,color:"rgba(255,255,255,0.4)",width:18,textAlign:"right",flexShrink:0}}>{Math.round(v*100)}</span>
                     </div>
                   ))}
                 </div>
