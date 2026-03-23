@@ -33,11 +33,8 @@ export default function PlanetDetail({planet, onBack, voted, userMode}) {
   useEffect(()=>{
     if (!isAdvanced || !voted) return; // briefs are advanced + voted-only
     if(fetched)return;setFetched(true);setLoading(true);
-    // Sanitize planet fields to prevent prompt injection
-    const safe = (v, max=80) => String(v ?? "").replace(/[\n\r]/g, " ").replace(/[`$]/g, "").slice(0, max);
-    const prompt=`You are an expert exoplanet astronomer writing for a crowdsourced JWST observation planning platform.\n\nWrite a 3-paragraph scientific brief about ${safe(planet.name)} (${safe(planet.type)}, orbiting ${safe(planet.host)}).\nData: radius ${safe(planet.radius)}x Earth, mass ${planet.mass?safe(planet.mass)+"x Earth":"unknown"}, period ${safe(planet.period)} days, equilibrium temperature ${safe(planet.temp)}K, discovered ${safe(planet.year)} by ${safe(planet.scope)}.\n\nParagraph 1: Physical nature and scientific distinctiveness.\nParagraph 2: What JWST could realistically learn from observing it.\nParagraph 3: Honest priority vs other targets - including limitations.\n\nPrecise, compelling scientific prose. No bullets, no markdown, no mention of ESI score.`;
-    fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:900,messages:[{role:"user",content:prompt}]})})
-      .then(r=>r.json()).then(d=>setAnalysis(d.content?.find(b=>b.type==="text")?.text||"Unavailable.")).catch(()=>setAnalysis("Analysis unavailable.")).finally(()=>setLoading(false));
+    fetch("/api/brief",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({planet})})
+      .then(r=>r.json()).then(d=>setAnalysis(d.text||"Unavailable.")).catch(()=>setAnalysis("Analysis unavailable.")).finally(()=>setLoading(false));
   },[planet.id, isAdvanced]);
   return (
     <div style={{maxWidth:740,margin:"0 auto"}}>
