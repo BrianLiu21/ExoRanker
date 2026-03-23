@@ -3,7 +3,7 @@ import { rdColor } from '../utils/glicko2';
 import PlanetOrb from './primitives/PlanetOrb';
 
 export default function PlanetRankings({planets, onViewDetail, lastVotedIds}) {
-  const sorted = [...planets].sort((a,b) => b.r - a.r);
+  const sorted = [...planets].sort((a,b) => (b.r||1500) - (a.r||1500));
   const recentIds = lastVotedIds || new Set();
 
   return (

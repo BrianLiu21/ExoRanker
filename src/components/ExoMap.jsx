@@ -117,7 +117,7 @@ export default function ExoMap({ planets, onViewDetail }) {
     s.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
     s.crossOrigin = "anonymous";
     s.onload = () => { window.__THREE__ = window.THREE; setThreeReady(true); };
-    s.onerror = () => console.error("ExoMap: failed to load Three.js");
+    s.onerror = () => { console.error("ExoMap: failed to load Three.js"); setThreeReady("error"); };
     document.head.appendChild(s);
   }, []);
 
@@ -373,10 +373,12 @@ export default function ExoMap({ planets, onViewDetail }) {
           }}
         />
 
-        {/* Loading overlay */}
+        {/* Loading / error overlay */}
         {!threeReady && (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.15em' }}>LOADING 3D ENGINE…</div>
+            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: threeReady === 'error' ? '#E24B4A' : 'rgba(255,255,255,0.25)', letterSpacing: '0.15em' }}>
+              {threeReady === 'error' ? 'FAILED TO LOAD 3D ENGINE · CHECK CONNECTION' : 'LOADING 3D ENGINE…'}
+            </div>
           </div>
         )}
 

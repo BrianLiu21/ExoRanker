@@ -46,7 +46,7 @@ export default function MyProfile({user,onRetakeQuiz,onSwitchToAdvanced,onSignOu
           ].map(([k,v])=>(
             <div key={k} style={{background:"rgba(0,0,0,0.3)",borderRadius:8,padding:"12px 14px"}}>
               <div style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.3)",letterSpacing:"0.12em",marginBottom:4}}>{k.toUpperCase()}</div>
-              <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:18,fontWeight:700,color:k==="JR"?tier.color:tier.color}}>{v}</div>
+              <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:18,fontWeight:700,color:k==="JR"?tier.color:"rgba(255,255,255,0.88)"}}>{v}</div>
             </div>
           ))}
         </div>

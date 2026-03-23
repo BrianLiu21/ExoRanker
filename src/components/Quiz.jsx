@@ -72,7 +72,7 @@ export default function Quiz({username,onComplete}) {
             {score>6.0&&"Expert-level. Your votes carry maximum weight in the JWST priority consensus."}
           </div>
         </div>
-        <button onClick={()=>onComplete(score,tier)} style={{fontFamily:"'Orbitron',sans-serif",fontSize:12,fontWeight:700,padding:"14px 44px",borderRadius:8,background:tier.color,color:"#020a12",border:"none",cursor:"pointer",letterSpacing:"0.12em"}}>START VOTING</button>
+        <button onClick={()=>onComplete(score)} style={{fontFamily:"'Orbitron',sans-serif",fontSize:12,fontWeight:700,padding:"14px 44px",borderRadius:8,background:tier.color,color:"#020a12",border:"none",cursor:"pointer",letterSpacing:"0.12em"}}>START VOTING</button>
       </div>
     );
   }
