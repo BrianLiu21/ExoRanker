@@ -295,50 +295,62 @@ export default function App() {
 
   const Header = ({showNav=true, onSignOut=null}) => {
     const mob = useIsMobile();
-    const NAV = [["vote","VOTE"],["planets","PLANETS"],["map","MAP"],["users","BOARD"],["profile","PROFILE"]];
-    const Logo = () => (
-      <div style={{display:"flex",alignItems:"center",gap:10}}>
-        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style={{flexShrink:0}}>
-          <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" opacity="0.45"/>
-          <circle cx="15" cy="15" r="7" fill="#1D9E75" opacity="0.18"/>
-          <circle cx="15" cy="15" r="5.5" fill="#0d3d30"/>
-          <circle cx="15" cy="15" r="5.5" fill="url(#pg)" opacity="0.9"/>
-          <circle cx="13" cy="13" r="1.8" fill="#1D9E75" opacity="0.25"/>
-          <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" strokeDasharray="9 33" opacity="0.85"/>
-          <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff"/>
-          <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff" opacity="0.4" style={{filter:"blur(1px)"}}/>
-          <defs><radialGradient id="pg" cx="35%" cy="35%" r="65%"><stop offset="0%" stopColor="#2dd4a0"/><stop offset="100%" stopColor="#0a2820"/></radialGradient></defs>
-        </svg>
-        <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:"#e8f4ff",letterSpacing:"0.12em",marginRight:"-0.12em"}}>EXO</span><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:400,color:"#1D9E75",letterSpacing:"0.12em"}}>RANKER</span>
-        {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4}} title="Shared backend connected"/>}
-      </div>
+    const DESKTOP_NAV = [["vote","VOTE"],["planets","PLANETS"],["map","EXOMAP"],["users","LEADERBOARD"],["profile","MY PROFILE"]];
+    const MOBILE_NAV  = [["vote","VOTE"],["planets","PLANETS"],["map","MAP"],["users","BOARD"],["profile","PROFILE"]];
+    const SVG_LOGO = (
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style={{flexShrink:0}}>
+        <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" opacity="0.45"/>
+        <circle cx="15" cy="15" r="7" fill="#1D9E75" opacity="0.18"/>
+        <circle cx="15" cy="15" r="5.5" fill="#0d3d30"/>
+        <circle cx="15" cy="15" r="5.5" fill="url(#pg)" opacity="0.9"/>
+        <circle cx="13" cy="13" r="1.8" fill="#1D9E75" opacity="0.25"/>
+        <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" strokeDasharray="9 33" opacity="0.85"/>
+        <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff"/>
+        <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff" opacity="0.4" style={{filter:"blur(1px)"}}/>
+        <defs><radialGradient id="pg" cx="35%" cy="35%" r="65%"><stop offset="0%" stopColor="#2dd4a0"/><stop offset="100%" stopColor="#0a2820"/></radialGradient></defs>
+      </svg>
     );
-    const UserInfo = () => stage==="app"
+    const userInfo = stage==="app"
       ?<div style={{display:"flex",alignItems:"center",gap:8}}>
           <TierBadge tier={getEffectiveTier(user.jr||1000, user.mode)} sm/>
           <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.22)"}}>{user.totalVotes}v</span>
           {onSignOut && <button className="signout-btn" onClick={onSignOut} style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.25)",background:"transparent",border:"0.5px solid rgba(255,255,255,0.1)",borderRadius:5,padding:"3px 8px",cursor:"pointer",letterSpacing:"0.08em"}}>sign out</button>}
         </div>
       :<div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.3)"}}>{planetCount} planets</div>;
-    const NavRow = () => showNav && (
-      <div style={{display:"flex",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-        {NAV.map(([v,l])=>(
-          <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:"0.1em",padding:"7px 10px",borderRadius:6,cursor:"pointer",flexShrink:0,background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.38)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
-        ))}
-      </div>
-    );
+
     if (mob) return (
       <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,10,18,0.93)",backdropFilter:"blur(10px)",borderBottom:"0.5px solid rgba(255,255,255,0.06)",padding:"0 16px"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:46}}><Logo/><UserInfo/></div>
-        {showNav && <div style={{paddingBottom:6}}><NavRow/></div>}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:46}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            {SVG_LOGO}
+            <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:"#e8f4ff",letterSpacing:"0.12em",marginRight:"-0.12em"}}>EXO</span><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:400,color:"#1D9E75",letterSpacing:"0.12em"}}>RANKER</span>
+            {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4}}/>}
+          </div>
+          {userInfo}
+        </div>
+        {showNav && (
+          <div style={{display:"flex",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:6}}>
+            {MOBILE_NAV.map(([v,l])=>(
+              <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:"0.1em",padding:"7px 10px",borderRadius:6,cursor:"pointer",flexShrink:0,background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.38)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
+            ))}
+          </div>
+        )}
       </div>
     );
+
+    // ── Desktop (unchanged from original) ──
     return (
       <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,10,18,0.93)",backdropFilter:"blur(10px)",borderBottom:"0.5px solid rgba(255,255,255,0.06)",padding:"0 24px"}}>
         <div style={{maxWidth:960,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56}}>
-          <Logo/>
-          <NavRow/>
-          <UserInfo/>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            {SVG_LOGO}
+            <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:"#e8f4ff",letterSpacing:"0.12em",marginRight:"-0.12em"}}>EXO</span><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:400,color:"#1D9E75",letterSpacing:"0.12em"}}>RANKER</span>
+            {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4}} title="Shared backend connected"/>}
+          </div>
+          {showNav&&<div style={{display:"flex",gap:3}}>{DESKTOP_NAV.map(([v,l])=>(
+            <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:"0.12em",padding:"7px 12px",borderRadius:6,cursor:"pointer",background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.38)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
+          ))}</div>}
+          {userInfo}
         </div>
       </div>
     );
