@@ -1,8 +1,8 @@
 // ─── BACKEND CONFIG ───────────────────────────────────────────────────────────
 // Replace these two values with your Supabase project credentials.
 // Find them at: supabase.com → your project → Settings → API
-export const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
-export const SUPABASE_KEY = "YOUR_ANON_KEY";
+export const SUPABASE_URL = "https://yfertfmapgwdunzwaebv.supabase.co";
+export const SUPABASE_KEY = "sb_publishable__GIK9aDCz4sbCn5-DAblKQ_TqmjRTz-";
 export const SB_ON = !SUPABASE_URL.includes("YOUR_");
 
 export const SBH = () => ({
