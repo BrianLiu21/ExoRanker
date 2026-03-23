@@ -32,7 +32,10 @@ export default function AccuracyToast({result, onDismiss, onViewDetail}) {
             const hc=phiComponents(p);
             const col=HAB_COLOR(hc.total);
             return (
-              <div key={p.id} onClick={()=>{ onViewDetail?.(p); onDismiss(); }} style={{background:"rgba(0,0,0,0.35)",borderRadius:8,padding:"7px 10px",border:`0.5px solid ${isCorrect?"#1D9E7566":"rgba(255,255,255,0.08)"}`,cursor:"pointer"}}>
+              <div key={p.id} onClick={()=>{ onViewDetail?.(p); onDismiss(); }}
+                onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.06)";e.currentTarget.style.borderColor=isCorrect?"#1D9E75aa":"rgba(255,255,255,0.22)";}}
+                onMouseLeave={e=>{e.currentTarget.style.background="rgba(0,0,0,0.35)";e.currentTarget.style.borderColor=isCorrect?"#1D9E7566":"rgba(255,255,255,0.08)";}}
+                style={{background:"rgba(0,0,0,0.35)",borderRadius:8,padding:"7px 10px",border:`0.5px solid ${isCorrect?"#1D9E7566":"rgba(255,255,255,0.08)"}`,cursor:"pointer",transition:"background 0.15s, border-color 0.15s"}}>
                 <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:7,color:isCorrect?"#1D9E75":"rgba(255,255,255,0.5)",marginBottom:3,letterSpacing:"0.04em",lineHeight:1.3}}>
                   {p.name}{isCorrect?" ✓":""}{isChosen&&!isCorrect?" ← your pick":""}
                 </div>
