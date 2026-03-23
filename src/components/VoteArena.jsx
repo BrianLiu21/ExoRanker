@@ -128,7 +128,7 @@ export default function VoteArena({planets, user, onVote, onViewDetail, votedIds
             <div style={{display:"flex",alignItems:"center",gap:6,background:`${streakInfo.color}18`,border:`0.5px solid ${streakInfo.color}55`,borderRadius:20,padding:"3px 10px",animation:"rare-pulse 1.5s ease-in-out infinite"}}>
               <div style={{width:5,height:5,borderRadius:"50%",background:streakInfo.color,boxShadow:`0 0 6px ${streakInfo.color}`}}/>
               <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:9,fontWeight:700,color:streakInfo.color,letterSpacing:"0.1em"}}>{streakInfo.label}</span>
-              <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:streakInfo.color}}>{streakInfo.mult}×</span>
+              <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:streakInfo.color}}>{streakInfo.mult}× JR bonus</span>
             </div>
           )}
         </div>

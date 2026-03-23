@@ -17,7 +17,7 @@ export default function AccuracyToast({result, onDismiss}) {
           )}
         </div>
         <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.3)",textAlign:"right"}}>
-          {isTie ? "not scored · Glicko-2 only" : result.correct ? `+${result.points.toFixed(1)} pts${result.streakMult>1?` · ${result.streakMult}× streak`:""}` : `−${result.points.toFixed(1)} pts · streak reset`}
+          {isTie ? "not scored · Glicko-2 only" : result.correct ? `+${result.points.toFixed(1)} pts${result.streakMult>1?` · ${result.streakMult}× JR bonus`:""}` : `−${result.points.toFixed(1)} pts · streak reset`}
         </div>
       </div>
       {isTie ? (
