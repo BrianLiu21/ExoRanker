@@ -375,7 +375,7 @@ export default function App() {
       )}
 
       <div style={{padding:"36px 24px 80px",position:"relative",zIndex:1}}>
-        {view==="vote"    && <VoteArena planets={planets} user={user} onVote={handleVote} onViewDetail={goDetail} votedIds={votedIds}/>}
+        {view==="vote"    && <VoteArena planets={planets} user={user} onVote={handleVote} onViewDetail={goDetail} onNextPair={()=>setToast(null)} votedIds={votedIds}/>}
         {view==="planets" && <PlanetRankings planets={planets} onViewDetail={goDetail} lastVotedIds={lastVotedPair}/>}
         {view==="map"     && <ExoMap planets={planets} onViewDetail={goDetail}/>}
         {view==="users"   && <UserLeaderboard allUsers={allUsers} currentUser={user} lastSync={lastSync}/>}
@@ -387,7 +387,7 @@ export default function App() {
         EXORANKER · KNOWLEDGE-WEIGHTED CROWDSOURCED JWST PRIORITIES · OPEN DATASET
       </div>
 
-      {toast && <AccuracyToast result={toast} onDismiss={()=>setToast(null)}/>}
+      {toast && <AccuracyToast result={toast} onDismiss={()=>setToast(null)} onViewDetail={goDetail}/>}
       {tierUpgradeToast && <TierUpgradeToast tier={tierUpgradeToast.tier} reason={tierUpgradeToast.reason} wentUp={tierUpgradeToast.wentUp} onDismiss={()=>setTierUpgradeToast(null)}/>}
     </div></>
   );

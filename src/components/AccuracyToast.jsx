@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { phiComponents, HAB_LABEL, HAB_COLOR } from '../utils/phi';
 
-export default function AccuracyToast({result, onDismiss}) {
+export default function AccuracyToast({result, onDismiss, onViewDetail}) {
   useEffect(()=>{const t=setTimeout(onDismiss,4500);return()=>clearTimeout(t);},[]);
   const isTie=!result.scoreable;
   const labelColor=isTie?"#888780":result.correct?"#1D9E75":"#E24B4A";
@@ -32,7 +32,7 @@ export default function AccuracyToast({result, onDismiss}) {
             const hc=phiComponents(p);
             const col=HAB_COLOR(hc.total);
             return (
-              <div key={p.id} style={{background:"rgba(0,0,0,0.35)",borderRadius:8,padding:"10px 12px",border:`0.5px solid ${isCorrect?"#1D9E7566":"rgba(255,255,255,0.08)"}`}}>
+              <div key={p.id} onClick={()=>{ onViewDetail?.(p); onDismiss(); }} style={{background:"rgba(0,0,0,0.35)",borderRadius:8,padding:"10px 12px",border:`0.5px solid ${isCorrect?"#1D9E7566":"rgba(255,255,255,0.08)"}`,cursor:"pointer"}}>
                 <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:8,color:isCorrect?"#1D9E75":"rgba(255,255,255,0.5)",marginBottom:4,letterSpacing:"0.04em",lineHeight:1.3}}>
                   {p.name}{isCorrect?" ✓":""}{isChosen&&!isCorrect?" ← your pick":""}
                 </div>
@@ -53,7 +53,7 @@ export default function AccuracyToast({result, onDismiss}) {
         </div>
       )}
       <div style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.18)",marginTop:8,textAlign:"center"}}>
-        Click any planet card to explore further
+        Click a PHI card above to open its full detail view
       </div>
     </div>
   );
