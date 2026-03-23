@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useIsMobile } from '../utils/useIsMobile';
 
 const HUE_HEX = {
   teal:   '#1D9E75',
@@ -99,6 +100,7 @@ function planetXYZ(planet) {
 
 export default function ExoMap({ planets, onViewDetail }) {
   const mountRef   = useRef(null);
+  const isMobile   = useIsMobile();
   const [threeReady, setThreeReady] = useState(!!window.__THREE__);
   const [info, setInfo]   = useState(null); // { planet, x, y }
 
@@ -238,11 +240,14 @@ export default function ExoMap({ planets, onViewDetail }) {
     raycaster.params.Points = { threshold: 4 };
     const mouse = new THREE.Vector2();
 
-    // ─ Mouse state ─
+    // ─ Mouse / touch state ─
     let dragging = false;
     let lastX = 0, lastY = 0;
     let hoveredIdx = -1;
     let clickTarget = null;
+    let touchMoved = false;
+    let touchStartX = 0, touchStartY = 0;
+    let pinchStartDist = 0;
 
     const onMouseDown = (e) => {
       dragging = true;
@@ -266,7 +271,7 @@ export default function ExoMap({ planets, onViewDetail }) {
         return;
       }
 
-      // Raycasting
+      // Raycasting (hover — desktop only)
       mouse.x =  (mx / rect.width)  * 2 - 1;
       mouse.y = -(my / rect.height) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
@@ -294,11 +299,66 @@ export default function ExoMap({ planets, onViewDetail }) {
       if (clickTarget) onViewDetail(clickTarget);
     };
 
+    // ─ Touch handlers ─
+    const onTouchStart = (e) => {
+      if (e.touches.length === 1) {
+        dragging = true;
+        touchMoved = false;
+        lastX = e.touches[0].clientX;
+        lastY = e.touches[0].clientY;
+        touchStartX = lastX;
+        touchStartY = lastY;
+      } else if (e.touches.length === 2) {
+        dragging = false;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        pinchStartDist = Math.sqrt(dx * dx + dy * dy);
+      }
+    };
+
+    const onTouchMove = (e) => {
+      e.preventDefault();
+      if (e.touches.length === 1 && dragging) {
+        const tx = e.touches[0].clientX;
+        const ty = e.touches[0].clientY;
+        camTheta -= (tx - lastX) * 0.005;
+        camPhi = Math.max(0.12, Math.min(Math.PI - 0.12, camPhi - (ty - lastY) * 0.005));
+        updateCam();
+        if (Math.abs(tx - touchStartX) > 8 || Math.abs(ty - touchStartY) > 8) touchMoved = true;
+        lastX = tx;
+        lastY = ty;
+      } else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        camRadius = Math.max(25, Math.min(450, camRadius - (dist - pinchStartDist) * 0.5));
+        pinchStartDist = dist;
+        updateCam();
+      }
+    };
+
+    const onTouchEnd = (e) => {
+      dragging = false;
+      if (!touchMoved && e.changedTouches.length === 1) {
+        const rect = el.getBoundingClientRect();
+        const tx = e.changedTouches[0].clientX - rect.left;
+        const ty = e.changedTouches[0].clientY - rect.top;
+        mouse.x =  (tx / rect.width)  * 2 - 1;
+        mouse.y = -(ty / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const hits = raycaster.intersectObject(planetPoints);
+        if (hits.length > 0) onViewDetail(validPlanets[hits[0].index]);
+      }
+    };
+
     renderer.domElement.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mouseup', onMouseUp);
     renderer.domElement.addEventListener('mousemove', onMouseMove);
     renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
     renderer.domElement.addEventListener('click', onClick);
+    renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: true });
+    renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: false });
+    renderer.domElement.addEventListener('touchend', onTouchEnd, { passive: true });
 
     // ─ Resize handler ─
     const onResize = () => {
@@ -329,6 +389,9 @@ export default function ExoMap({ planets, onViewDetail }) {
       renderer.domElement.removeEventListener('mousemove', onMouseMove);
       renderer.domElement.removeEventListener('wheel', onWheel);
       renderer.domElement.removeEventListener('click', onClick);
+      renderer.domElement.removeEventListener('touchstart', onTouchStart);
+      renderer.domElement.removeEventListener('touchmove', onTouchMove);
+      renderer.domElement.removeEventListener('touchend', onTouchEnd);
       window.removeEventListener('resize', onResize);
       renderer.dispose();
       planetGeo.dispose(); planetMat.dispose();
@@ -345,7 +408,7 @@ export default function ExoMap({ planets, onViewDetail }) {
         <div>
           <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, color: '#e8f4ff', letterSpacing: '0.15em', marginBottom: 4 }}>3D EXOPLANET MAP</div>
           <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em' }}>
-            {planets.length} PLANETS · DRAG TO ORBIT · SCROLL TO ZOOM · CLICK FOR DETAILS
+            {planets.length} PLANETS · {isMobile ? 'DRAG TO ORBIT · PINCH TO ZOOM · TAP FOR DETAILS' : 'DRAG TO ORBIT · SCROLL TO ZOOM · CLICK FOR DETAILS'}
           </div>
         </div>
         {/* Color legend */}
@@ -364,7 +427,7 @@ export default function ExoMap({ planets, onViewDetail }) {
         <div
           ref={mountRef}
           style={{
-            width: '100%', height: 620,
+            width: '100%', height: isMobile ? 420 : 620,
             borderRadius: 14,
             overflow: 'hidden',
             background: 'radial-gradient(ellipse at 50% 40%, #020e1a 0%, #010408 100%)',
