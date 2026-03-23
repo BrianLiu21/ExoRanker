@@ -1,15 +1,23 @@
 import { useState } from 'react';
+import { sb, SB_ON } from '../config/supabase';
 
 export default function CreateAccount({onComplete, planetCount, liveData}) {
   const [name,setName]=useState("");
   const [mode,setMode]=useState(null); // "beginner" | "advanced"
   const [err,setErr]=useState("");
+  const [checking,setChecking]=useState(false);
   const trimmed=name.trim();
   const valid=trimmed.length>=2&&trimmed.length<=20&&/^[a-zA-Z0-9_\-. ]+$/.test(trimmed)&&!!mode;
 
-  const handle=()=>{
+  const handle=async()=>{
     if(!trimmed||trimmed.length<2){setErr("2–20 chars, letters/numbers/._- only");return;}
     if(!mode){setErr("Choose a mode first");return;}
+    if(SB_ON){
+      setChecking(true);
+      const existing=await sb.get("users",`select=username&username=eq.${encodeURIComponent(trimmed)}`);
+      setChecking(false);
+      if(Array.isArray(existing)&&existing.length>0){setErr("That callsign is already taken. Choose another.");return;}
+    }
     onComplete(trimmed, mode);
   };
 
@@ -97,14 +105,14 @@ export default function CreateAccount({onComplete, planetCount, liveData}) {
           style={{width:"100%",background:"rgba(0,0,0,0.4)",border:"0.5px solid rgba(255,255,255,0.15)",borderRadius:8,padding:"12px 16px",fontFamily:"'Space Mono',monospace",fontSize:13,color:"#e8f4ff",outline:"none",marginBottom:8,boxSizing:"border-box"}}/>
         {err&&<div style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"#E24B4A",marginBottom:8,textAlign:"left"}}>{err}</div>}
         <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.2)",marginBottom:20,textAlign:"left"}}>Your public identity on the leaderboard</div>
-        <button onClick={handle} disabled={!valid} style={{
+        <button onClick={handle} disabled={!valid||checking} style={{
           width:"100%",fontFamily:"'Orbitron',sans-serif",fontSize:12,fontWeight:700,padding:"14px 0",borderRadius:8,
-          cursor:valid?"pointer":"not-allowed",letterSpacing:"0.12em",transition:"all 0.2s",
+          cursor:(valid&&!checking)?"pointer":"not-allowed",letterSpacing:"0.12em",transition:"all 0.2s",
           background: !valid?"rgba(255,255,255,0.04)":mode==="advanced"?"rgba(29,158,117,0.2)":"rgba(55,138,221,0.2)",
           color: !valid?"rgba(255,255,255,0.2)":mode==="advanced"?"#1D9E75":"#378ADD",
           border: !valid?"0.5px solid rgba(255,255,255,0.08)":mode==="advanced"?"1px solid #1D9E75":"1px solid #378ADD",
         }}>
-          {!mode?"SELECT A MODE FIRST":mode==="advanced"?"CREATE PROFILE → TAKE QUIZ":"START EXPLORING →"}
+          {checking?"CHECKING...":!mode?"SELECT A MODE FIRST":mode==="advanced"?"CREATE PROFILE → TAKE QUIZ":"START EXPLORING →"}
         </button>
       </div>
     </div>
