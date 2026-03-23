@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useIsMobile } from './utils/useIsMobile';
 import { FONTS } from './constants/fonts';
 import { SB_ON, sb } from './config/supabase';
 import { FALLBACK_PLANETS } from './data/planets';
@@ -292,51 +293,56 @@ export default function App() {
 
   const CSS = `${FONTS}*{box-sizing:border-box;margin:0;padding:0}body{background:#020a12}@keyframes orb-pulse{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}@keyframes shimmer{0%,100%{opacity:.35}50%{opacity:.7}}@keyframes rare-pulse{0%,100%{opacity:.7}50%{opacity:1}}@keyframes rainbow-shift{0%{filter:hue-rotate(0deg) brightness(1.4)}100%{filter:hue-rotate(360deg) brightness(1.4)}}@keyframes rainbow-radiate{0%,100%{text-shadow:0 0 10px #ff0080,0 0 30px #ff008088,0 0 60px #ff008044,0 0 120px #ff008022}25%{text-shadow:0 0 10px #00ffcc,0 0 30px #00ffcc88,0 0 60px #00ffcc44,0 0 120px #00ffcc22}50%{text-shadow:0 0 10px #0080ff,0 0 30px #0080ff88,0 0 60px #0080ff44,0 0 120px #0080ff22}75%{text-shadow:0 0 10px #ffcc00,0 0 30px #ffcc0088,0 0 60px #ffcc0044,0 0 120px #ffcc0022}}@keyframes float-up{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-52px) scale(0.8)}}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#020a12}::-webkit-scrollbar-thumb{background:#1D9E7533;border-radius:2px}.nav-btn{transition:all 0.18s ease!important}.nav-btn:hover{transform:scale(1.09)!important;opacity:1!important}.signout-btn{transition:all 0.18s ease!important}.signout-btn:hover{transform:scale(1.08)!important;color:rgba(255,255,255,0.55)!important;border-color:rgba(255,255,255,0.28)!important}`;
 
-  const Header = ({showNav=true, onSignOut=null}) => (
-    <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,10,18,0.93)",backdropFilter:"blur(10px)",borderBottom:"0.5px solid rgba(255,255,255,0.06)",padding:"0 24px"}}>
-      <div style={{maxWidth:960,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          {/* Planet + orbital ring logo */}
-          <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style={{flexShrink:0}}>
-            {/* Orbital ring behind planet */}
-            <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" opacity="0.45"/>
-            {/* Planet glow */}
-            <circle cx="15" cy="15" r="7" fill="#1D9E75" opacity="0.18"/>
-            {/* Planet body */}
-            <circle cx="15" cy="15" r="5.5" fill="#0d3d30"/>
-            <circle cx="15" cy="15" r="5.5" fill="url(#pg)" opacity="0.9"/>
-            {/* Planet surface shimmer */}
-            <circle cx="13" cy="13" r="1.8" fill="#1D9E75" opacity="0.25"/>
-            {/* Orbital ring in front */}
-            <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" strokeDasharray="9 33" opacity="0.85"/>
-            {/* Orbiting dot (exoplanet) */}
-            <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff"/>
-            <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff" opacity="0.4" style={{filter:"blur(1px)"}}/>
-            <defs>
-              <radialGradient id="pg" cx="35%" cy="35%" r="65%">
-                <stop offset="0%" stopColor="#2dd4a0"/>
-                <stop offset="100%" stopColor="#0a2820"/>
-              </radialGradient>
-            </defs>
-          </svg>
-          {/* Wordmark — marginRight compensates trailing letter-spacing so EXO·RANKER touch */}
-          <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:"#e8f4ff",letterSpacing:"0.12em",marginRight:"-0.12em"}}>EXO</span><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:400,color:"#1D9E75",letterSpacing:"0.12em"}}>RANKER</span>
-          {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4}} title="Shared backend connected"/>}
-        </div>
-        {showNav&&<div style={{display:"flex",gap:3}}>{[["vote","VOTE"],["planets","PLANETS"],["map","EXOMAP"],["users","LEADERBOARD"],["profile","MY PROFILE"]].map(([v,l])=>(
-          <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:"0.12em",padding:"7px 12px",borderRadius:6,cursor:"pointer",background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.38)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
-        ))}</div>}
-        {stage==="app"
-          ?<div style={{display:"flex",alignItems:"center",gap:8}}>
-            <TierBadge tier={getEffectiveTier(user.jr||1000, user.mode)} sm/>
-            <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.22)"}}>{user.totalVotes}v</span>
-            {onSignOut && <button className="signout-btn" onClick={onSignOut} style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.25)",background:"transparent",border:"0.5px solid rgba(255,255,255,0.1)",borderRadius:5,padding:"3px 8px",cursor:"pointer",letterSpacing:"0.08em"}}>sign out</button>}
-          </div>
-          :<div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.3)"}}>{planetCount} planets</div>
-        }
+  const Header = ({showNav=true, onSignOut=null}) => {
+    const mob = useIsMobile();
+    const NAV = [["vote","VOTE"],["planets","PLANETS"],["map","MAP"],["users","BOARD"],["profile","PROFILE"]];
+    const Logo = () => (
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style={{flexShrink:0}}>
+          <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" opacity="0.45"/>
+          <circle cx="15" cy="15" r="7" fill="#1D9E75" opacity="0.18"/>
+          <circle cx="15" cy="15" r="5.5" fill="#0d3d30"/>
+          <circle cx="15" cy="15" r="5.5" fill="url(#pg)" opacity="0.9"/>
+          <circle cx="13" cy="13" r="1.8" fill="#1D9E75" opacity="0.25"/>
+          <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" strokeDasharray="9 33" opacity="0.85"/>
+          <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff"/>
+          <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff" opacity="0.4" style={{filter:"blur(1px)"}}/>
+          <defs><radialGradient id="pg" cx="35%" cy="35%" r="65%"><stop offset="0%" stopColor="#2dd4a0"/><stop offset="100%" stopColor="#0a2820"/></radialGradient></defs>
+        </svg>
+        <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:"#e8f4ff",letterSpacing:"0.12em",marginRight:"-0.12em"}}>EXO</span><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:400,color:"#1D9E75",letterSpacing:"0.12em"}}>RANKER</span>
+        {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4}} title="Shared backend connected"/>}
       </div>
-    </div>
-  );
+    );
+    const UserInfo = () => stage==="app"
+      ?<div style={{display:"flex",alignItems:"center",gap:8}}>
+          <TierBadge tier={getEffectiveTier(user.jr||1000, user.mode)} sm/>
+          <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.22)"}}>{user.totalVotes}v</span>
+          {onSignOut && <button className="signout-btn" onClick={onSignOut} style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.25)",background:"transparent",border:"0.5px solid rgba(255,255,255,0.1)",borderRadius:5,padding:"3px 8px",cursor:"pointer",letterSpacing:"0.08em"}}>sign out</button>}
+        </div>
+      :<div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.3)"}}>{planetCount} planets</div>;
+    const NavRow = () => showNav && (
+      <div style={{display:"flex",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+        {NAV.map(([v,l])=>(
+          <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:"0.1em",padding:"7px 10px",borderRadius:6,cursor:"pointer",flexShrink:0,background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.38)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
+        ))}
+      </div>
+    );
+    if (mob) return (
+      <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,10,18,0.93)",backdropFilter:"blur(10px)",borderBottom:"0.5px solid rgba(255,255,255,0.06)",padding:"0 16px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:46}}><Logo/><UserInfo/></div>
+        {showNav && <div style={{paddingBottom:6}}><NavRow/></div>}
+      </div>
+    );
+    return (
+      <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,10,18,0.93)",backdropFilter:"blur(10px)",borderBottom:"0.5px solid rgba(255,255,255,0.06)",padding:"0 24px"}}>
+        <div style={{maxWidth:960,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56}}>
+          <Logo/>
+          <NavRow/>
+          <UserInfo/>
+        </div>
+      </div>
+    );
+  };
 
   if (stage === "account") return (
     <><style>{CSS}</style>

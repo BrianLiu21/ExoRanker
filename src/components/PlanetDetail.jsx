@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useIsMobile } from '../utils/useIsMobile';
 import { HC } from '../constants/colors';
 import { habitabilityComponents, HAB_LABEL, HAB_COLOR } from '../utils/phi';
 import { rdLabel, rdColor } from '../utils/glicko2';
@@ -23,6 +24,7 @@ const PLANET_TYPE_DESCRIPTIONS = {
 };
 
 export default function PlanetDetail({planet, onBack, voted, userMode}) {
+  const isMobile = useIsMobile();
   const isAdvanced = userMode === "advanced";
   const c=HC[planet.hue]||HC.blue;
   const hc=habitabilityComponents(planet);
@@ -55,7 +57,7 @@ export default function PlanetDetail({planet, onBack, voted, userMode}) {
             </div>
           )}
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+        <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(4,1fr)",gap:10}}>
           {[["Radius",`${planet.radius}x Earth`],["Mass",planet.mass?`${planet.mass}x Earth`:"-"],["Eq. Temp",`${planet.temp} K`],["Period",planet.period<1?`${(planet.period*24).toFixed(1)}h`:`${planet.period}d`],["Distance",planet.dist<1000?`${planet.dist} ly`:`${(planet.dist/1000).toFixed(1)}k ly`],["Host",planet.host],["Rating",planet.r||1500],["Confidence",rdLabel(planet.rd||350)]].map(([k,v])=>(
             <div key={k} style={{background:"rgba(0,0,0,0.28)",borderRadius:7,padding:"10px 12px"}}><div style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.3)",letterSpacing:"0.1em",marginBottom:3}}>{k}</div><div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.88)",fontWeight:"bold"}}>{v}</div></div>
           ))}

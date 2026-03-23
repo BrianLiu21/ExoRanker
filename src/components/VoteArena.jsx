@@ -3,10 +3,12 @@ import { HC } from '../constants/colors';
 import { getEffectiveTier } from '../utils/userTiers';
 import { getStreak } from '../utils/streak';
 import { getPlanetOfDay, buildWeightedQueue } from '../utils/misc';
+import { useIsMobile } from '../utils/useIsMobile';
 import PlanetCard from './PlanetCard';
 import TierBadge from './primitives/TierBadge';
 
 export default function VoteArena({planets, user, onVote, onViewDetail, onNextPair, votedIds}) {
+  const isMobile = useIsMobile();
   const [pair,setPair]    = useState(null);
   const [voted,setVoted]  = useState(null);
   const [animating,setAnimating] = useState(false);
@@ -176,7 +178,7 @@ export default function VoteArena({planets, user, onVote, onViewDetail, onNextPa
         </div>
       )}
 
-      <div style={{display:"grid",gridTemplateColumns:"1fr 44px 1fr",gap:12,alignItems:"stretch",maxWidth:860,margin:"0 auto"}}>
+      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 44px 1fr",gap:12,alignItems:"stretch",maxWidth:860,margin:"0 auto"}}>
         {/* Card A */}
         <div style={{opacity:voted&&voted!==a.id?0.32:1,transform:voted===a.id?"scale(1.02)":voted&&voted!==a.id?"scale(0.97)":"scale(1)",transition:"all 0.38s ease",paddingTop:"0",position:"relative",display:"flex",flexDirection:"column"}}>
           <PlanetCard planet={a} onClick={()=>onViewDetail(a)}/>
@@ -193,7 +195,7 @@ export default function VoteArena({planets, user, onVote, onViewDetail, onNextPa
             {voted===a.id?"SELECTED":"PRIORITIZE"}</button>
         </div>
 
-        <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8,paddingTop:"0"}}>
+        <div style={{display:"flex",flexDirection:isMobile?"row":"column",alignItems:"center",justifyContent:"center",gap:8,paddingTop:"0"}}>
           <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:18,fontWeight:900,color:"rgba(255,255,255,0.12)",letterSpacing:"0.15em"}}>VS</div>
           <button onClick={()=>pickPair(planets)}
             style={{background:"transparent",border:"0.5px solid rgba(255,255,255,0.12)",color:"rgba(255,255,255,0.3)",borderRadius:6,padding:"5px 8px",cursor:"pointer",fontSize:10,fontFamily:"'Space Mono',monospace",transition:"transform 0.18s ease, border-color 0.18s, color 0.18s"}}
