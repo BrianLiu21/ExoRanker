@@ -6,7 +6,7 @@ import { getPlanetOfDay, buildWeightedQueue } from '../utils/misc';
 import PlanetCard from './PlanetCard';
 import TierBadge from './primitives/TierBadge';
 
-export default function VoteArena({planets, user, onVote, onViewDetail, votedIds}) {
+export default function VoteArena({planets, user, onVote, onViewDetail, onNextPair, votedIds}) {
   const [pair,setPair]    = useState(null);
   const [voted,setVoted]  = useState(null);
   const [animating,setAnimating] = useState(false);
@@ -73,7 +73,7 @@ export default function VoteArena({planets, user, onVote, onViewDetail, votedIds
       setEloShift({ a: shiftA, b: -shiftA });
     }
     onVote(pair[0].id, pair[1].id, winnerId);
-    setTimeout(() => { setAnimating(false); pickPair(planets); }, 1100);
+    setTimeout(() => { setAnimating(false); pickPair(planets); onNextPair?.(); }, 1100);
   };
 
   if (!pair) return null;

@@ -187,7 +187,7 @@ export default function App() {
     const gap = Math.abs(habA - habB);
     const correctId = habA > habB ? aId : habB > habA ? bId : null;
     const correct = correctId !== null && winnerId === correctId;
-    const MEANINGFUL_GAP = 0.08;
+    const MEANINGFUL_GAP = 0.05;
     const scoreable = gap >= MEANINGFUL_GAP;
     const points = scoreable ? parseFloat((gap * 100).toFixed(2)) : 0;
 
