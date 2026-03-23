@@ -1,0 +1,45 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #020a12;
+}
+
+@keyframes orb-pulse {
+  0%, 100% { opacity: .8; }
+  50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: .35; }
+  50% { opacity: .7; }
+}
+
+@keyframes rare-pulse {
+  0%, 100% { opacity: .7; }
+  50% { opacity: 1; }
+}
+
+@keyframes rainbow-shift {
+  0% { filter: hue-rotate(0deg) brightness(1.4); }
+  100% { filter: hue-rotate(360deg) brightness(1.4); }
+}
+
+@keyframes rainbow-radiate {
+  0%, 100% { text-shadow: 0 0 10px #ff0080, 0 0 30px #ff008088, 0 0 60px #ff008044, 0 0 120px #ff008022; }
+  25% { text-shadow: 0 0 10px #00ffcc, 0 0 30px #00ffcc88, 0 0 60px #00ffcc44, 0 0 120px #00ffcc22; }
+  50% { text-shadow: 0 0 10px #0080ff, 0 0 30px #0080ff88, 0 0 60px #0080ff44, 0 0 120px #0080ff22; }
+  75% { text-shadow: 0 0 10px #ffcc00, 0 0 30px #ffcc0088, 0 0 60px #ffcc0044, 0 0 120px #ffcc0022; }
+}
+
+@keyframes float-up {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-52px) scale(0.8); }
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #020a12; }
+::-webkit-scrollbar-thumb { background: #1D9E7533; border-radius: 2px; }

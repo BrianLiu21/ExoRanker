@@ -1,0 +1,3 @@
+export default function TierBadge({tier,sm=false}) {
+  return (<div style={{display:"inline-flex",alignItems:"center",gap:sm?4:6,background:"rgba(0,0,0,0.45)",border:`0.5px solid ${tier.color}55`,borderRadius:20,padding:sm?"3px 8px":"5px 13px"}}><div style={{width:sm?5:7,height:sm?5:7,borderRadius:"50%",background:tier.color,boxShadow:`0 0 5px ${tier.color}`}}/><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:sm?9:11,color:tier.color,fontWeight:700,letterSpacing:"0.07em"}}>{tier.label}</span><span style={{fontFamily:"'Space Mono',monospace",fontSize:sm?8:9,color:"rgba(255,255,255,0.3)"}}>{tier.weight}x</span></div>);
+}
