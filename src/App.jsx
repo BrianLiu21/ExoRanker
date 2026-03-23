@@ -133,10 +133,15 @@ export default function App() {
     if (mode === "advanced") {
       setStage("quiz");
     } else {
-      // Beginner: skip quiz, go straight to app with 0× weight
       saveLocal("er_user1", u);
       setStage("app");
     }
+  };
+
+  const handleLogin = (existingUser) => {
+    setUser(existingUser);
+    saveLocal("er_user1", existingUser);
+    setStage("app");
   };
 
   const handleQuizDone = async (score) => {
@@ -317,7 +322,7 @@ export default function App() {
     <div style={{minHeight:"100vh",background:"#020a12",color:"white",position:"relative"}}>
       <StarField/><Header showNav={false}/>
       <div style={{padding:"60px 24px 80px",position:"relative",zIndex:1}}>
-        <CreateAccount onComplete={handleAccount} planetCount={planetCount} liveData={liveData}/>
+        <CreateAccount onComplete={handleAccount} onLogin={handleLogin} planetCount={planetCount} liveData={liveData}/>
       </div>
     </div></>
   );
