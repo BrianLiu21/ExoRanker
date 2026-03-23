@@ -33,6 +33,8 @@ export default function VoteArena({planets, user, onVote, onViewDetail, onNextPa
     }
   };
   const queueRef = useRef([]);
+  const planetsRef = useRef(planets);
+  useEffect(() => { planetsRef.current = planets; }, [planets]);
   const tier = getEffectiveTier(user.jr||1000, user.mode);
 
   const pickPair = useCallback(ps => {
@@ -43,7 +45,17 @@ export default function VoteArena({planets, user, onVote, onViewDetail, onNextPa
     const idxB = queueRef.current.findIndex(id => id !== idA);
     const idB = idxB >= 0 ? queueRef.current.splice(idxB,1)[0] : queueRef.current.shift();
     const pa = ps.find(x => x.id === idA), pb = ps.find(x => x.id === idB);
-    if (pa && pb) { setPair([pa, pb]); setVoted(null); setEloShift(null); }
+    if (pa && pb) {
+      setPair([pa, pb]); setVoted(null); setEloShift(null);
+    } else {
+      // IDs not found (stale queue) — rebuild and retry once
+      queueRef.current = buildWeightedQueue(ps, user.jr||1000, user.mode);
+      const a2 = queueRef.current.shift();
+      const i2 = queueRef.current.findIndex(id => id !== a2);
+      const b2 = i2 >= 0 ? queueRef.current.splice(i2,1)[0] : queueRef.current.shift();
+      const pa2 = ps.find(x => x.id === a2), pb2 = ps.find(x => x.id === b2);
+      if (pa2 && pb2) { setPair([pa2, pb2]); setVoted(null); setEloShift(null); }
+    }
   }, [user.jr, user.mode]);
 
   useEffect(() => { if (planets.length >= 2) pickPair(planets); }, []);
@@ -73,7 +85,7 @@ export default function VoteArena({planets, user, onVote, onViewDetail, onNextPa
       setEloShift({ a: shiftA, b: -shiftA });
     }
     onVote(pair[0].id, pair[1].id, winnerId);
-    setTimeout(() => { setAnimating(false); pickPair(planets); onNextPair?.(); }, 1100);
+    setTimeout(() => { setAnimating(false); pickPair(planetsRef.current); onNextPair?.(); }, 1100);
   };
 
   if (!pair) return null;
