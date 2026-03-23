@@ -12,7 +12,7 @@ export default function AccuracyToast({result, onDismiss, onViewDetail}) {
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:isTie?6:12}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:11,color:labelColor,letterSpacing:"0.12em",fontWeight:700}}>{label}</div>
-          {result.correct && result.newStreak >= 3 && newStreakInfo?.label && (
+          {!isTie && result.correct && result.newStreak >= 3 && newStreakInfo?.label && (
             <div style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:newStreakInfo.color,background:`${newStreakInfo.color}18`,padding:"2px 8px",borderRadius:10,border:`0.5px solid ${newStreakInfo.color}55`}}>{newStreakInfo.label} 🔥</div>
           )}
         </div>
@@ -52,9 +52,11 @@ export default function AccuracyToast({result, onDismiss, onViewDetail}) {
           })}
         </div>
       )}
-      <div style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.18)",marginTop:8,textAlign:"center"}}>
-        Click a PHI card above to open its full detail view
-      </div>
+      {!isTie && (
+        <div style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.18)",marginTop:8,textAlign:"center"}}>
+          Click a PHI card above to open its full detail view
+        </div>
+      )}
     </div>
   );
 }
