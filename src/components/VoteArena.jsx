@@ -104,7 +104,7 @@ export default function VoteArena({planets, user, onVote, onViewDetail, votedIds
             <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:10,color:"#1D9E75",fontWeight:700}}>{potd.name}</span>
             <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.3)",marginLeft:8}}>{potd.type}</span>
           </div>
-          <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.25)"}}>read the brief →</span>
+          <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.25)"}}>view details →</span>
         </div>
       )}
 

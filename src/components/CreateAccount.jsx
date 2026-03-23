@@ -87,7 +87,7 @@ export default function CreateAccount({onComplete, onLogin, planetCount, liveDat
                 "Take a quiz → earn a Judgment Rating",
                 "Votes weighted by your JR tier",
                 "Higher JR draws from a tighter pool of similar planets",
-                "Unlock PHI breakdown, 3D model, scientific brief",
+                "Unlock PHI breakdown and 3D model",
                 "Appear on the leaderboard · JR rises and falls",
               ],
             },
