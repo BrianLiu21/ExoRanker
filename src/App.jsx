@@ -52,24 +52,44 @@ export default function App() {
       let rawPlanets = null;
       let isLive = false;
 
-      // 1. Try Vercel /api/planets (only works when deployed)
+      // Helper: parse and enrich a raw NASA TAP response array
+      const parseNASARows = (rows) => {
+        if (!Array.isArray(rows) || rows.length <= 10) return null;
+        const seen = new Set();
+        const enriched = [];
+        for (const row of rows) {
+          if (!row.pl_name || seen.has(row.pl_name)) continue;
+          seen.add(row.pl_name);
+          const p = enrichNASARow(row);
+          if (p) enriched.push(p);
+        }
+        return enriched.length > 10 ? enriched : null;
+      };
+
+      // 1a. Try Vercel /api/planets proxy (works when deployed)
       try {
-        const r = await fetch("/api/planets");
+        const r = await fetch("/api/planets", { signal: AbortSignal.timeout(10000) });
         if (r.ok) {
           const rows = await r.json();
-          if (Array.isArray(rows) && rows.length > 10) {
-            const seen = new Set();
-            const enriched = [];
-            for (const row of rows) {
-              if (!row.pl_name || seen.has(row.pl_name)) continue;
-              seen.add(row.pl_name);
-              const p = enrichNASARow(row);
-              if (p) enriched.push(p);
-            }
-            if (enriched.length > 10) { rawPlanets = enriched; isLive = true; }
-          }
+          const parsed = parseNASARows(rows);
+          if (parsed) { rawPlanets = parsed; isLive = true; }
         }
       } catch {}
+
+      // 1b. Try NASA Exoplanet Archive directly (works in local dev)
+      if (!rawPlanets) {
+        try {
+          const cols = "pl_name,hostname,pl_rade,pl_bmasse,pl_orbper,pl_eqt,sy_dist,st_spectype,st_age,disc_year,disc_facility,discoverymethod";
+          const q = `SELECT ${cols} FROM ps WHERE default_flag=1 AND pl_rade IS NOT NULL AND pl_eqt IS NOT NULL AND pl_orbper IS NOT NULL`;
+          const url = `https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=${encodeURIComponent(q)}&format=json&maxrec=2000`;
+          const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
+          if (r.ok) {
+            const rows = await r.json();
+            const parsed = parseNASARows(rows);
+            if (parsed) { rawPlanets = parsed; isLive = true; }
+          }
+        } catch {}
+      }
 
       // 2. Fall back to built-in dataset
       if (!rawPlanets) rawPlanets = FALLBACK_PLANETS;
