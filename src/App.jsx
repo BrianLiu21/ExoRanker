@@ -18,6 +18,7 @@ import PlanetRankings from './components/PlanetRankings';
 import UserLeaderboard from './components/UserLeaderboard';
 import PlanetDetail from './components/PlanetDetail';
 import MyProfile from './components/MyProfile';
+import ExoMap from './components/ExoMap';
 import AccuracyToast from './components/AccuracyToast';
 import TierUpgradeToast from './components/TierUpgradeToast';
 
@@ -79,7 +80,7 @@ export default function App() {
       // 1b. Try NASA Exoplanet Archive directly (works in local dev)
       if (!rawPlanets) {
         try {
-          const cols = "pl_name,hostname,pl_rade,pl_bmasse,pl_orbper,pl_eqt,sy_dist,st_spectype,st_age,disc_year,disc_facility,discoverymethod";
+          const cols = "pl_name,hostname,pl_rade,pl_bmasse,pl_orbper,pl_eqt,sy_dist,ra,dec,st_spectype,st_age,disc_year,disc_facility,discoverymethod";
           const q = `SELECT ${cols} FROM ps WHERE default_flag=1 AND pl_rade IS NOT NULL AND pl_eqt IS NOT NULL AND pl_orbper IS NOT NULL`;
           const url = `https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=${encodeURIComponent(q)}&format=json&maxrec=2000`;
           const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
@@ -323,7 +324,7 @@ export default function App() {
           <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:"#e8f4ff",letterSpacing:"0.12em",marginRight:"-0.12em"}}>EXO</span><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:400,color:"#1D9E75",letterSpacing:"0.12em"}}>RANKER</span>
           {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4}} title="Shared backend connected"/>}
         </div>
-        {showNav&&<div style={{display:"flex",gap:3}}>{[["vote","VOTE"],["planets","PLANETS"],["users","LEADERBOARD"],["profile","MY PROFILE"]].map(([v,l])=>(
+        {showNav&&<div style={{display:"flex",gap:3}}>{[["vote","VOTE"],["planets","PLANETS"],["map","EXOMAP"],["users","LEADERBOARD"],["profile","MY PROFILE"]].map(([v,l])=>(
           <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:"0.12em",padding:"7px 12px",borderRadius:6,cursor:"pointer",background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.38)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
         ))}</div>}
         {stage==="app"
@@ -377,6 +378,7 @@ export default function App() {
       <div style={{padding:"36px 24px 80px",position:"relative",zIndex:1}}>
         {view==="vote"    && <VoteArena planets={planets} user={user} onVote={handleVote} onViewDetail={goDetail} votedIds={votedIds}/>}
         {view==="planets" && <PlanetRankings planets={planets} onViewDetail={goDetail} lastVotedIds={lastVotedPair}/>}
+        {view==="map"     && <ExoMap planets={planets} onViewDetail={goDetail}/>}
         {view==="users"   && <UserLeaderboard allUsers={allUsers} currentUser={user} lastSync={lastSync}/>}
         {view==="profile" && <MyProfile user={user} onRetakeQuiz={()=>setStage("quiz")} onSwitchToAdvanced={()=>{setUser(u=>{const n={...u,mode:"advanced"};saveLocal("er_user1",n);return n;});setStage("quiz");}} onSignOut={signOut}/>}
         {view==="detail"  && detail && <PlanetDetail planet={detail} onBack={goBack} voted={votedIds.has(detail.id)} userMode={user.mode}/>}

@@ -12,6 +12,8 @@ const COLUMNS = [
   "pl_orbper",
   "pl_eqt",
   "sy_dist",
+  "ra",
+  "dec",
   "st_spectype",
   "st_age",
   "disc_year",

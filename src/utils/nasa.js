@@ -76,11 +76,13 @@ export function enrichNASARow(r) {
   // ON DEPLOY: st_spectype and st_age come directly from NASA API
   const st     = inferStarType(r.st_spectype) || inferStTypeFromName(r.hostname || "");
   const stAge  = r.st_age != null ? parseFloat((+r.st_age).toFixed(1)) : null;
+  const ra  = r.ra  != null ? +r.ra  : null;
+  const dec = r.dec != null ? +r.dec : null;
   return {
     id:     (r.pl_name || "").toLowerCase().replace(/[^a-z0-9]/g, "-"),
     name:   r.pl_name || "Unknown",
     host:   r.hostname || "Unknown",
-    dist,   type,
+    dist,   type, ra, dec,
     radius: parseFloat(radius.toFixed(2)),
     mass:   mass ? parseFloat(mass.toFixed(2)) : null,
     period: parseFloat(period.toFixed(2)),
