@@ -103,6 +103,7 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
   const isMobile   = useIsMobile();
   const [threeReady, setThreeReady] = useState(!!window.__THREE__);
   const [info, setInfo]   = useState(null); // { planet, x, y }
+  const votedCount = votedIds ? votedIds.size : 0;
 
   // ── Load Three.js once (reuse if already loaded) ─────────────────────────
   useEffect(() => {
@@ -407,17 +408,17 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
       {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
         <div>
-          <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, color: '#e8f4ff', letterSpacing: '0.15em', marginBottom: 4 }}>3D EXOPLANET MAP</div>
-          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em' }}>
+          <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 16, fontWeight: 900, color: '#e8f4ff', letterSpacing: '0.15em', marginBottom: 5 }}>3D EXOPLANET MAP</div>
+          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.1em' }}>
             {planets.length} PLANETS · {isMobile ? 'DRAG TO ORBIT · PINCH TO ZOOM · TAP FOR DETAILS' : 'DRAG TO ORBIT · SCROLL TO ZOOM · CLICK FOR DETAILS'}
           </div>
         </div>
         {/* Color legend */}
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           {[['teal','Habitable zone'],['blue','Sub-Neptune'],['amber','Hot world'],['red','Lava/extreme'],['purple','Gas/ice giant']].map(([hue, label]) => (
-            <div key={hue} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: HUE_HEX[hue], boxShadow: `0 0 8px ${HUE_HEX[hue]}` }}/>
-              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, color: 'rgba(255,255,255,0.3)' }}>{label}</span>
+            <div key={hue} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 9, height: 9, borderRadius: '50%', background: HUE_HEX[hue], boxShadow: `0 0 10px ${HUE_HEX[hue]}` }}/>
+              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.62)' }}>{label}</span>
             </div>
           ))}
         </div>
@@ -450,67 +451,83 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
         {info && (
           <div style={{
             position: 'absolute',
-            left: Math.min(info.x + 16, 730),
+            left: Math.min(info.x + 16, 720),
             top:  Math.max(info.y - 70, 8),
-            background: 'rgba(4,11,20,0.96)',
-            border: `0.5px solid ${HUE_HEX[info.planet.hue] || '#378ADD'}55`,
-            borderRadius: 10,
-            padding: '10px 14px',
+            background: 'rgba(4,11,20,0.97)',
+            border: `1px solid ${HUE_HEX[info.planet.hue] || '#378ADD'}88`,
+            borderRadius: 12,
+            padding: '12px 16px',
             pointerEvents: 'none',
             zIndex: 20,
-            minWidth: 190,
-            boxShadow: `0 4px 24px rgba(0,0,0,0.6), 0 0 12px ${HUE_HEX[info.planet.hue] || '#378ADD'}18`,
+            minWidth: 210,
+            boxShadow: `0 4px 32px rgba(0,0,0,0.7), 0 0 18px ${HUE_HEX[info.planet.hue] || '#378ADD'}28`,
           }}>
-            <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 700, color: '#e8f4ff', marginBottom: 3 }}>
-              {info.planet.name}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 700, color: '#e8f4ff' }}>
+                {info.planet.name}
+              </div>
+              {votedIds && votedIds.has(info.planet.id) && (
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: '#1D9E75', background: 'rgba(29,158,117,0.15)', border: '0.5px solid #1D9E7566', borderRadius: 4, padding: '2px 6px', letterSpacing: '0.08em' }}>VOTED</div>
+              )}
             </div>
-            <div style={{ fontFamily: "'Crimson Pro',serif", fontSize: 12, color: 'rgba(255,255,255,0.45)', fontStyle: 'italic', marginBottom: 8 }}>
+            <div style={{ fontFamily: "'Crimson Pro',serif", fontSize: 13, color: 'rgba(255,255,255,0.62)', fontStyle: 'italic', marginBottom: 10 }}>
               {info.planet.type} · {info.planet.host}
             </div>
             <div style={{ display: 'flex', gap: 16 }}>
               <div>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', marginBottom: 2 }}>RATING</div>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, fontWeight: 'bold', color: HUE_HEX[info.planet.hue] || '#378ADD' }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.1em', marginBottom: 3 }}>RATING</div>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 14, fontWeight: 'bold', color: HUE_HEX[info.planet.hue] || '#378ADD' }}>
                   {info.planet.r || 1500}
                 </div>
               </div>
               <div>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', marginBottom: 2 }}>DISTANCE</div>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.1em', marginBottom: 3 }}>DISTANCE</div>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 14, color: 'rgba(255,255,255,0.75)' }}>
                   {info.planet.dist < 9000 ? (info.planet.dist < 1000 ? `${info.planet.dist} ly` : `${(info.planet.dist/1000).toFixed(1)}k ly`) : '?'}
                 </div>
               </div>
               <div>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', marginBottom: 2 }}>TEMP</div>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.1em', marginBottom: 3 }}>TEMP</div>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 14, color: 'rgba(255,255,255,0.75)' }}>
                   {info.planet.temp} K
                 </div>
               </div>
             </div>
-            <div style={{ marginTop: 7, fontFamily: "'Space Mono',monospace", fontSize: 7, color: 'rgba(255,255,255,0.22)', letterSpacing: '0.08em' }}>
+            <div style={{ marginTop: 8, fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em' }}>
               click to view details →
             </div>
           </div>
         )}
 
-        {/* Bottom-left label */}
-        <div style={{ position: 'absolute', bottom: 14, left: 16, fontFamily: "'Space Mono',monospace", fontSize: 7, color: 'rgba(255,255,255,0.18)', letterSpacing: '0.1em', pointerEvents: 'none' }}>
-          SIZE &amp; BRIGHTNESS = COMMUNITY RATING
+        {/* Bottom-left: voted legend */}
+        <div style={{ position: 'absolute', bottom: 14, left: 16, pointerEvents: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#1D9E75', boxShadow: '0 0 12px #1D9E75, 0 0 24px #1D9E7566' }}/>
+            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.75)', letterSpacing: '0.08em' }}>VOTED — bright &amp; large</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(55,138,221,0.25)', boxShadow: '0 0 4px rgba(55,138,221,0.2)' }}/>
+            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.38)', letterSpacing: '0.08em' }}>NOT VOTED — dim &amp; small</span>
+          </div>
+          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.06em', marginTop: 2 }}>
+            {votedCount} of {planets.length} planets voted
+          </div>
         </div>
 
-        {/* Rating scale legend */}
+        {/* Bottom-right: size = rating */}
         <div style={{ position: 'absolute', bottom: 14, right: 16, display: 'flex', alignItems: 'center', gap: 6, pointerEvents: 'none' }}>
-          {[['dim',8,'LOW'],['med',14,'MED'],['bright',20,'HIGH']].map(([k,sz,label]) => (
+          {[['dim',6,'LOW'],['med',10,'MED'],['bright',15,'HIGH']].map(([k,sz,label]) => (
             <div key={k} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <div style={{ width: sz/3, height: sz/3, borderRadius: '50%', background: '#378ADD', boxShadow: `0 0 ${sz/2}px #378ADD` }}/>
-              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 6, color: 'rgba(255,255,255,0.2)' }}>{label}</span>
+              <div style={{ width: sz/2, height: sz/2, borderRadius: '50%', background: '#1D9E75', boxShadow: `0 0 ${sz}px #1D9E75` }}/>
+              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.45)' }}>{label}</span>
             </div>
           ))}
+          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.38)', marginLeft: 4 }}>RATING</span>
         </div>
       </div>
 
       {/* Bottom note */}
-      <div style={{ marginTop: 10, fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(255,255,255,0.2)', textAlign: 'center', letterSpacing: '0.08em', lineHeight: 1.6 }}>
+      <div style={{ marginTop: 10, fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.42)', textAlign: 'center', letterSpacing: '0.08em', lineHeight: 1.6 }}>
         Directions are real (RA/Dec). Distances: ~60% measured, ~40% estimated from discovery survey depth (Kepler/TESS/RV etc.).
       </div>
     </div>
