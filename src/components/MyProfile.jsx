@@ -52,7 +52,7 @@ export default function MyProfile({user,onRetakeQuiz,onSwitchToAdvanced,onSignOu
         </div>
 
         {/* Accuracy sparkline */}
-        {isAdvanced && (user.voteHistory||[]).length >= 3 && (
+        {(user.voteHistory||[]).length >= 3 && (
           <div style={{background:"rgba(0,0,0,0.25)",borderRadius:10,padding:"14px 16px",marginBottom:12}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
               <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.3)",letterSpacing:"0.12em"}}>RECENT ACCURACY · LAST {Math.min((user.voteHistory||[]).length,20)} VOTES</div>
