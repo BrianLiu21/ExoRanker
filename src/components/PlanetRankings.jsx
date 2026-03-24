@@ -9,9 +9,9 @@ export default function PlanetRankings({planets, onViewDetail, lastVotedIds}) {
   return (
     <div style={{maxWidth:680,margin:"0 auto"}}>
       <div style={{marginBottom:20}}>
-        <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:"0.2em",color:"rgba(255,255,255,0.3)",marginBottom:6}}>KNOWLEDGE-WEIGHTED GLICKO-2 · CROWDSOURCED CONSENSUS</div>
+        <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:"0.2em",color:"rgba(255,255,255,0.58)",marginBottom:6}}>KNOWLEDGE-WEIGHTED GLICKO-2 · CROWDSOURCED CONSENSUS</div>
         <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:20,fontWeight:700,color:"#e8f4ff",marginBottom:6}}>Planet Priority Index</div>
-        <div style={{fontFamily:"'Crimson Pro',serif",fontSize:13,color:"rgba(255,255,255,0.35)",fontStyle:"italic"}}>Habitability scores are hidden from voters. Rankings emerge from blind inference.</div>
+        <div style={{fontFamily:"'Crimson Pro',serif",fontSize:13,color:"rgba(255,255,255,0.62)",fontStyle:"italic"}}>Habitability scores are hidden from voters. Rankings emerge from blind inference.</div>
       </div>
 
       {sorted.map((p,i)=>{
@@ -37,16 +37,16 @@ export default function PlanetRankings({planets, onViewDetail, lastVotedIds}) {
                   <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:11,fontWeight:700,color:"#e8f4ff"}}>{p.name}</div>
                   {isRecent && <div style={{fontFamily:"'Space Mono',monospace",fontSize:7,color:c.accent,letterSpacing:"0.08em"}}>JUST VOTED</div>}
                 </div>
-                <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.4)"}}>{p.type} · {p.host}</div>
+                <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.62)"}}>{p.type} · {p.host}</div>
               </div>
             </div>
             <div style={{textAlign:"right"}}>
               <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:15,fontWeight:700,color:c.accent}}>{p.r||1500}</div>
               <div style={{display:"flex",alignItems:"center",gap:5,justifyContent:"flex-end",marginTop:2}}>
-                <div style={{width:28,height:2,background:"rgba(255,255,255,0.06)",borderRadius:1}}>
+                <div style={{width:28,height:2,background:"rgba(255,255,255,0.12)",borderRadius:1}}>
                   <div style={{width:`${Math.round((1-(Math.min(350,p.rd||350)/350))*100)}%`,height:"100%",background:rdColor(p.rd||350),borderRadius:1}}/>
                 </div>
-                <div style={{fontFamily:"'Space Mono',monospace",fontSize:7,color:"rgba(255,255,255,0.25)"}}>{p.matchups||0}v</div>
+                <div style={{fontFamily:"'Space Mono',monospace",fontSize:7,color:"rgba(255,255,255,0.5)"}}>{p.matchups||0}v</div>
               </div>
             </div>
           </div>

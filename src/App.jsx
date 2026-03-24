@@ -394,9 +394,9 @@ export default function App() {
       {view !== "detail" && (
         <div style={{background:"rgba(3,10,18,0.65)",borderBottom:"0.5px solid rgba(255,255,255,0.04)",padding:"8px 24px"}}>
           <div style={{maxWidth:960,margin:"0 auto",display:"flex",gap:24,alignItems:"center",flexWrap:"wrap"}}>
-            <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.3)"}}>TOP PLANET: <span style={{color:"#FFD700"}}>{topPlanet?.name}</span><span style={{margin:"0 8px",color:"rgba(255,255,255,0.15)"}}>|</span><span style={{color:"#1D9E75"}}>{topPlanet?.r||1500}<span style={{opacity:0.45,fontSize:8}}> ±{topPlanet?.rd||350}</span></span></div>
-            <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.3)"}}>YOUR JR: <span style={{color:getEffectiveTier(user.jr||1000,user.mode).color}}>{user.mode==="advanced"?user.jr||1000:"learn mode"}</span></div>
-            <div style={{marginLeft:"auto",fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.18)"}}>{planetCount} planets · {liveData?"live NASA data":"built-in dataset"}{SB_ON?" · shared backend":""}</div>
+            <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.55)"}}>TOP PLANET: <span style={{color:"#FFD700"}}>{topPlanet?.name}</span><span style={{margin:"0 8px",color:"rgba(255,255,255,0.3)"}}>|</span><span style={{color:"#1D9E75"}}>{topPlanet?.r||1500}<span style={{opacity:0.65,fontSize:8}}> ±{topPlanet?.rd||350}</span></span></div>
+            <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.55)"}}>YOUR JR: <span style={{color:getEffectiveTier(user.jr||1000,user.mode).color}}>{user.mode==="advanced"?user.jr||1000:"learn mode"}</span></div>
+            <div style={{marginLeft:"auto",fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.42)"}}>{planetCount} planets · {liveData?"live NASA data":"built-in dataset"}{SB_ON?" · shared backend":""}</div>
           </div>
         </div>
       )}
@@ -453,7 +453,7 @@ export default function App() {
         {view==="detail"  && detail && <PlanetDetail planet={detail} onBack={goBack} voted={votedIds.has(detail.id)} userMode={user.mode}/>}
       </div>
 
-      <div style={{borderTop:"0.5px solid rgba(255,255,255,0.04)",padding:"16px 24px",textAlign:"center",fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.15)",letterSpacing:"0.1em"}}>
+      <div style={{borderTop:"0.5px solid rgba(255,255,255,0.08)",padding:"16px 24px",textAlign:"center",fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.35)",letterSpacing:"0.1em"}}>
         EXORANKER · KNOWLEDGE-WEIGHTED CROWDSOURCED JWST PRIORITIES · OPEN DATASET
       </div>
 

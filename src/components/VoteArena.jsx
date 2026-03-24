@@ -114,17 +114,17 @@ export default function VoteArena({planets, user, onVote, onViewDetail, onNextPa
           onMouseLeave={e=>{e.currentTarget.style.background="rgba(29,158,117,0.06)";e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
           <div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 8px #1D9E75",flexShrink:0}}/>
           <div style={{flex:1}}>
-            <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(29,158,117,0.7)",letterSpacing:"0.15em"}}>PLANET OF THE DAY · </span>
+            <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"#1D9E75",letterSpacing:"0.15em"}}>PLANET OF THE DAY · </span>
             <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:10,color:"#1D9E75",fontWeight:700}}>{potd.name}</span>
-            <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.3)",marginLeft:8}}>{potd.type}</span>
+            <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.62)",marginLeft:8}}>{potd.type}</span>
           </div>
-          <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.25)"}}>view details →</span>
+          <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.7)"}}>view details →</span>
         </div>
       )}
 
       <div style={{textAlign:"center",marginBottom:20}}>
-        <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.35)",letterSpacing:"0.22em",marginBottom:8}}>JWST OBSERVATION PRIORITY · CAST YOUR VOTE</div>
-        <div style={{fontFamily:"'Crimson Pro',serif",fontSize:17,color:"rgba(255,255,255,0.55)",fontStyle:"italic",marginBottom:10}}>Which exoplanet deserves limited telescope time more?</div>
+        <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.65)",letterSpacing:"0.22em",marginBottom:8}}>JWST OBSERVATION PRIORITY · CAST YOUR VOTE</div>
+        <div style={{fontFamily:"'Crimson Pro',serif",fontSize:17,color:"rgba(255,255,255,0.85)",fontStyle:"italic",marginBottom:10}}>Which exoplanet deserves limited telescope time more?</div>
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,flexWrap:"wrap"}}>
           {user.mode === "beginner" ? (
             <div style={{display:"flex",alignItems:"center",gap:8,background:"rgba(55,138,221,0.1)",border:"0.5px solid #378ADD44",borderRadius:20,padding:"4px 14px"}}>
@@ -133,9 +133,9 @@ export default function VoteArena({planets, user, onVote, onViewDetail, onNextPa
             </div>
           ) : (
             <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.25)"}}>Weight:</span>
+              <span style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.58)"}}>Weight:</span>
               <TierBadge tier={tier} sm/>
-              <span style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.2)"}}>· JR ±{Math.round(tier.k * streakInfo.mult)}</span>
+              <span style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.52)"}}>· JR ±{Math.round(tier.k * streakInfo.mult)}</span>
             </div>
           )}
           {streak >= 3 && user.mode === "advanced" && (
@@ -157,7 +157,7 @@ export default function VoteArena({planets, user, onVote, onViewDetail, onNextPa
         }}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
             <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:9,color:"#378ADD",letterSpacing:"0.12em"}}>HOW TO READ A PLANET CARD</div>
-            <button onClick={dismissTutorial} style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.3)",background:"transparent",border:"none",cursor:"pointer",padding:"2px 6px"}}>got it ×</button>
+            <button onClick={dismissTutorial} style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.62)",background:"transparent",border:"none",cursor:"pointer",padding:"2px 6px"}}>got it ×</button>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 24px"}}>
             {[
@@ -168,11 +168,11 @@ export default function VoteArena({planets, user, onVote, onViewDetail, onNextPa
             ].map(([k,v])=>(
               <div key={k} style={{display:"flex",gap:8,alignItems:"baseline"}}>
                 <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:8,color:"#378ADD",flexShrink:0,minWidth:52}}>{k}</span>
-                <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.45)",lineHeight:1.4}}>{v}</span>
+                <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.72)",lineHeight:1.4}}>{v}</span>
               </div>
             ))}
           </div>
-          <div style={{fontFamily:"'Crimson Pro',serif",fontSize:12,color:"rgba(255,255,255,0.3)",fontStyle:"italic",marginTop:10}}>
+          <div style={{fontFamily:"'Crimson Pro',serif",fontSize:12,color:"rgba(255,255,255,0.58)",fontStyle:"italic",marginTop:10}}>
             Vote for whichever planet you think deserves JWST observation time more. Vote for what you think is right. Every vote builds your intuition.
           </div>
         </div>
@@ -196,7 +196,7 @@ export default function VoteArena({planets, user, onVote, onViewDetail, onNextPa
         </div>
 
         <div style={{display:"flex",flexDirection:isMobile?"row":"column",alignItems:"center",justifyContent:"center",gap:8,paddingTop:"0"}}>
-          <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:18,fontWeight:900,color:"rgba(255,255,255,0.12)",letterSpacing:"0.15em"}}>VS</div>
+          <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:18,fontWeight:900,color:"rgba(255,255,255,0.38)",letterSpacing:"0.15em"}}>VS</div>
           <button onClick={()=>pickPair(planets)}
             style={{background:"transparent",border:"0.5px solid rgba(255,255,255,0.12)",color:"rgba(255,255,255,0.3)",borderRadius:6,padding:"5px 8px",cursor:"pointer",fontSize:10,fontFamily:"'Space Mono',monospace",transition:"transform 0.18s ease, border-color 0.18s, color 0.18s"}}
             onMouseEnter={e=>{e.currentTarget.style.transform="scale(1.14)";e.currentTarget.style.borderColor="rgba(255,255,255,0.3)";e.currentTarget.style.color="rgba(255,255,255,0.6)";}}
@@ -221,13 +221,13 @@ export default function VoteArena({planets, user, onVote, onViewDetail, onNextPa
 
       {/* Progress bar */}
       <div style={{marginTop:20,display:"flex",alignItems:"center",gap:12}}>
-        <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.25)",flexShrink:0}}>{votedCount}/{planets.length} planets seen</span>
-        <div style={{flex:1,height:2,background:"rgba(255,255,255,0.06)",borderRadius:1}}>
-          <div style={{width:`${pct}%`,height:"100%",background:"#1D9E7566",borderRadius:1,transition:"width 0.5s ease"}}/>
+        <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.55)",flexShrink:0}}>{votedCount}/{planets.length} planets seen</span>
+        <div style={{flex:1,height:2,background:"rgba(255,255,255,0.1)",borderRadius:1}}>
+          <div style={{width:`${pct}%`,height:"100%",background:"#1D9E75",borderRadius:1,transition:"width 0.5s ease"}}/>
         </div>
-        <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.25)",flexShrink:0}}>{pct}%</span>
+        <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.55)",flexShrink:0}}>{pct}%</span>
       </div>
-      <div style={{textAlign:"center",marginTop:8}}><span style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.18)"}}>Click a card for full data · Habitability scores are hidden. Read the raw data and judge for yourself</span></div>
+      <div style={{textAlign:"center",marginTop:8}}><span style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.45)"}}>Click a card for full data · Habitability scores are hidden. Read the raw data and judge for yourself</span></div>
     </div>
   );
 }
