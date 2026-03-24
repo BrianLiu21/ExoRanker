@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useIsMobile } from './utils/useIsMobile';
 import { FONTS } from './constants/fonts';
+import { HC } from './constants/colors';
 import { SB_ON, sb } from './config/supabase';
 import { FALLBACK_PLANETS } from './data/planets';
 import { enrichNASARow } from './utils/nasa';
@@ -37,6 +38,9 @@ export default function App() {
   const [lastSync,setLastSync]=useState(null);
   const [votedIds,setVotedIds]=useState(()=>{
     try{const p=JSON.parse(localStorage.getItem("er_voted1")||"[]");return new Set(Array.isArray(p)?p:[]);}catch{return new Set();}
+  });
+  const [recentVotedList,setRecentVotedList]=useState(()=>{
+    try{const p=JSON.parse(localStorage.getItem("er_voted1")||"[]");return Array.isArray(p)?p:[];}catch{return [];}
   });
   const [user,setUser]=useState({username:"",quizScore:0,jr:1000,totalVotes:0,weightedCorrect:0,weightedTotal:0,accuracy:0,influence:0,streak:0,bestStreak:0,voteHistory:[],tutorialDone:false});
   const [allUsers,setAllUsers]=useState([]);
@@ -231,6 +235,11 @@ export default function App() {
       saveLocal("er_voted1", [...next]);
       return next;
     });
+    // Track recency order (newest first)
+    setRecentVotedList(prev => {
+      const updated = [bId, aId, ...prev.filter(id => id !== aId && id !== bId)];
+      return updated.slice(0, 120);
+    });
 
     // Update user accuracy, jr, and influence
     setUser(prev => {
@@ -295,8 +304,8 @@ export default function App() {
 
   const Header = ({showNav=true, onSignOut=null}) => {
     const mob = useIsMobile();
-    const DESKTOP_NAV = [["vote","VOTE"],["planets","PLANETS"],["map","EXOMAP"],["users","LEADERBOARD"],["profile","MY PROFILE"]];
-    const MOBILE_NAV  = [["vote","VOTE"],["planets","PLANETS"],["map","MAP"],["users","BOARD"],["profile","PROFILE"]];
+    const DESKTOP_NAV = [["vote","VOTE"],["planets","PLANETS"],["voted","VOTED"],["map","EXOMAP"],["users","LEADERBOARD"],["profile","MY PROFILE"]];
+    const MOBILE_NAV  = [["vote","VOTE"],["planets","PLANETS"],["voted","VOTED"],["map","MAP"],["users","BOARD"],["profile","PROFILE"]];
     const SVG_LOGO = (
       <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style={{flexShrink:0}}>
         <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" opacity="0.45"/>
@@ -393,9 +402,52 @@ export default function App() {
       )}
 
       <div style={{padding:"36px 24px 80px",position:"relative",zIndex:1}}>
-        {view==="vote"    && <VoteArena planets={planets} user={user} onVote={handleVote} onViewDetail={goDetail} onNextPair={()=>setToast(null)} votedIds={votedIds}/>}
+        {/* Keep VoteArena mounted when navigating to detail so the pair is preserved */}
+        {(view==="vote" || (view==="detail" && prevView==="vote")) && (
+          <div style={{display:view==="vote"?"block":"none"}}>
+            <VoteArena planets={planets} user={user} onVote={handleVote} onViewDetail={goDetail} onNextPair={()=>setToast(null)} votedIds={votedIds}/>
+          </div>
+        )}
         {view==="planets" && <PlanetRankings planets={planets} onViewDetail={goDetail} lastVotedIds={lastVotedPair}/>}
-        {view==="map"     && <ExoMap planets={planets} onViewDetail={goDetail}/>}
+        {view==="voted"   && (() => {
+          const votedPlanets = recentVotedList.length > 0
+            ? recentVotedList.map(id => planets.find(p => p.id === id)).filter(Boolean)
+            : [...planets].filter(p => votedIds.has(p.id)).sort((a,b) => (b.r||1500)-(a.r||1500));
+          return (
+            <div style={{maxWidth:680,margin:"0 auto"}}>
+              <div style={{marginBottom:20}}>
+                <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:"0.2em",color:"rgba(255,255,255,0.3)",marginBottom:6}}>MOST RECENT FIRST</div>
+                <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:20,fontWeight:700,color:"#e8f4ff",marginBottom:6}}>Recently Voted</div>
+                <div style={{fontFamily:"'Crimson Pro',serif",fontSize:13,color:"rgba(255,255,255,0.35)",fontStyle:"italic"}}>{votedPlanets.length} of {planets.length} planets seen</div>
+              </div>
+              {votedPlanets.length === 0 && (
+                <div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.25)",textAlign:"center",padding:"60px 0"}}>No votes yet — head to VOTE to get started.</div>
+              )}
+              {votedPlanets.map((p,i) => {
+                const c = HC[p.hue]||HC.blue;
+                return (
+                  <div key={p.id} onClick={()=>goDetail(p)}
+                    style={{display:"grid",gridTemplateColumns:"32px 1fr auto",alignItems:"center",gap:14,padding:"12px 14px",marginBottom:5,borderRadius:10,
+                      background:"rgba(5,12,20,0.72)",border:"0.5px solid rgba(255,255,255,0.06)",
+                      cursor:"pointer",transition:"background 0.25s,border-color 0.25s,transform 0.22s ease,box-shadow 0.22s ease",willChange:"transform"}}
+                    onMouseEnter={e=>{e.currentTarget.style.background=`${c.bg}bb`;e.currentTarget.style.borderColor=c.accent;e.currentTarget.style.transform="scale(1.018) translateX(3px)";e.currentTarget.style.boxShadow=`0 4px 20px ${c.accent}22`;}}
+                    onMouseLeave={e=>{e.currentTarget.style.background="rgba(5,12,20,0.72)";e.currentTarget.style.borderColor="rgba(255,255,255,0.06)";e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
+                    <div style={{textAlign:"center",fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.25)"}}>#{i+1}</div>
+                    <div>
+                      <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:11,fontWeight:700,color:"#e8f4ff",marginBottom:2}}>{p.name}</div>
+                      <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.4)"}}>{p.type} · {p.host}</div>
+                    </div>
+                    <div style={{textAlign:"right"}}>
+                      <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:700,color:c.accent}}>{p.r||1500}</div>
+                      <div style={{fontFamily:"'Space Mono',monospace",fontSize:7,color:"rgba(255,255,255,0.25)"}}>{p.matchups||0}v</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+        {view==="map"     && <ExoMap planets={planets} votedIds={votedIds} onViewDetail={goDetail}/>}
         {view==="users"   && <UserLeaderboard allUsers={allUsers} currentUser={user} lastSync={lastSync}/>}
         {view==="profile" && <MyProfile user={user} onRetakeQuiz={()=>setStage("quiz")} onSwitchToAdvanced={()=>{setUser(u=>{const n={...u,mode:"advanced"};saveLocal("er_user1",n);return n;});setStage("quiz");}} onSignOut={signOut}/>}
         {view==="detail"  && detail && <PlanetDetail planet={detail} onBack={goBack} voted={votedIds.has(detail.id)} userMode={user.mode}/>}

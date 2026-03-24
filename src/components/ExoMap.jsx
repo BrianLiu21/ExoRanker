@@ -98,7 +98,7 @@ function planetXYZ(planet) {
   return [r * sinP * Math.cos(theta), r * cosP * 0.3, r * sinP * Math.sin(theta)];
 }
 
-export default function ExoMap({ planets, onViewDetail }) {
+export default function ExoMap({ planets, votedIds, onViewDetail }) {
   const mountRef   = useRef(null);
   const isMobile   = useIsMobile();
   const [threeReady, setThreeReady] = useState(!!window.__THREE__);
@@ -170,10 +170,11 @@ export default function ExoMap({ planets, onViewDetail }) {
 
       const rgb  = HUE_RGB[p.hue] || HUE_RGB.blue;
       const norm = Math.min(1, Math.max(0, ((p.r || 1500) - 1200) / 900));
-      const brightness = 0.35 + norm * 0.65;
+      const voted = votedIds && votedIds.has(p.id);
+      const brightness = voted ? (0.55 + norm * 0.45) : (0.07 + norm * 0.09);
       colorArr.push(rgb[0] / 255 * brightness, rgb[1] / 255 * brightness, rgb[2] / 255 * brightness);
 
-      sizeArr.push(1.8 + norm * 5.2);
+      sizeArr.push(voted ? (2.5 + norm * 5.5) : (1.0 + norm * 2.0));
       validPlanets.push(p);
     }
 
@@ -398,7 +399,7 @@ export default function ExoMap({ planets, onViewDetail }) {
       bgGeo.dispose(); bgMat.dispose();
       if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
     };
-  }, [threeReady, planets]);
+  }, [threeReady, planets, votedIds]);
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto' }}>
