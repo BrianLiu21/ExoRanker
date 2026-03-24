@@ -322,10 +322,10 @@ export default function App() {
     const userInfo = stage==="app"
       ?<div style={{display:"flex",alignItems:"center",gap:8}}>
           <TierBadge tier={getEffectiveTier(user.jr||1000, user.mode)} sm/>
-          <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.22)"}}>{user.totalVotes}v</span>
-          {onSignOut && <button className="signout-btn" onClick={onSignOut} style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.25)",background:"transparent",border:"0.5px solid rgba(255,255,255,0.1)",borderRadius:5,padding:"3px 8px",cursor:"pointer",letterSpacing:"0.08em"}}>sign out</button>}
+          <span style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.45)"}}>{user.totalVotes}v</span>
+          {onSignOut && <button className="signout-btn" onClick={onSignOut} style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.45)",background:"transparent",border:"0.5px solid rgba(255,255,255,0.15)",borderRadius:5,padding:"3px 8px",cursor:"pointer",letterSpacing:"0.08em"}}>sign out</button>}
         </div>
-      :<div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.3)"}}>{planetCount} planets</div>;
+      :<div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.5)"}}>{planetCount} planets</div>;
 
     if (mob) return (
       <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,10,18,0.93)",backdropFilter:"blur(10px)",borderBottom:"0.5px solid rgba(255,255,255,0.06)",padding:"0 16px"}}>
@@ -340,7 +340,7 @@ export default function App() {
         {showNav && (
           <div style={{display:"flex",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:6}}>
             {MOBILE_NAV.map(([v,l])=>(
-              <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:"0.1em",padding:"7px 10px",borderRadius:6,cursor:"pointer",flexShrink:0,background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.38)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
+              <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:11,letterSpacing:"0.1em",padding:"7px 10px",borderRadius:6,cursor:"pointer",flexShrink:0,background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.52)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
             ))}
           </div>
         )}
@@ -357,7 +357,7 @@ export default function App() {
             {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4}} title="Shared backend connected"/>}
           </div>
           {showNav&&<div style={{display:"flex",gap:3}}>{DESKTOP_NAV.map(([v,l])=>(
-            <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:"0.12em",padding:"7px 12px",borderRadius:6,cursor:"pointer",background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.38)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
+            <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:11,letterSpacing:"0.12em",padding:"7px 12px",borderRadius:6,cursor:"pointer",background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.52)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
           ))}</div>}
           {userInfo}
         </div>
@@ -394,9 +394,9 @@ export default function App() {
       {view !== "detail" && (
         <div style={{background:"rgba(3,10,18,0.65)",borderBottom:"0.5px solid rgba(255,255,255,0.04)",padding:"8px 24px"}}>
           <div style={{maxWidth:960,margin:"0 auto",display:"flex",gap:24,alignItems:"center",flexWrap:"wrap"}}>
-            <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.55)"}}>TOP PLANET: <span style={{color:"#FFD700"}}>{topPlanet?.name}</span><span style={{margin:"0 8px",color:"rgba(255,255,255,0.3)"}}>|</span><span style={{color:"#1D9E75"}}>{topPlanet?.r||1500}<span style={{opacity:0.65,fontSize:8}}> ±{topPlanet?.rd||350}</span></span></div>
-            <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.55)"}}>YOUR JR: <span style={{color:getEffectiveTier(user.jr||1000,user.mode).color}}>{user.mode==="advanced"?user.jr||1000:"learn mode"}</span></div>
-            <div style={{marginLeft:"auto",fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.42)"}}>{planetCount} planets · {liveData?"live NASA data":"built-in dataset"}{SB_ON?" · shared backend":""}</div>
+            <div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.55)"}}>TOP PLANET: <span style={{color:"#FFD700"}}>{topPlanet?.name}</span><span style={{margin:"0 8px",color:"rgba(255,255,255,0.3)"}}>|</span><span style={{color:"#1D9E75"}}>{topPlanet?.r||1500}<span style={{opacity:0.65,fontSize:10}}> ±{topPlanet?.rd||350}</span></span></div>
+            <div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.55)"}}>YOUR JR: <span style={{color:getEffectiveTier(user.jr||1000,user.mode).color}}>{user.mode==="advanced"?user.jr||1000:"learn mode"}</span></div>
+            <div style={{marginLeft:"auto",fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.42)"}}>{planetCount} planets · {liveData?"live NASA data":"built-in dataset"}{SB_ON?" · shared backend":""}</div>
           </div>
         </div>
       )}
@@ -453,7 +453,7 @@ export default function App() {
         {view==="detail"  && detail && <PlanetDetail planet={detail} onBack={goBack} voted={votedIds.has(detail.id)} userMode={user.mode}/>}
       </div>
 
-      <div style={{borderTop:"0.5px solid rgba(255,255,255,0.08)",padding:"16px 24px",textAlign:"center",fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.35)",letterSpacing:"0.1em"}}>
+      <div style={{borderTop:"0.5px solid rgba(255,255,255,0.08)",padding:"16px 24px",textAlign:"center",fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.35)",letterSpacing:"0.1em"}}>
         EXORANKER · KNOWLEDGE-WEIGHTED CROWDSOURCED JWST PRIORITIES · OPEN DATASET
       </div>
 

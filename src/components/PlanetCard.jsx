@@ -30,9 +30,9 @@ export default function PlanetCard({planet,onClick}) {
       <div style={{display:"flex",gap:14,alignItems:"flex-start",marginBottom:14}}>
         <PlanetOrb planet={planet} size={50}/>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:13,fontWeight:700,color:"#e8f4ff",letterSpacing:"0.05em",marginBottom:3,lineHeight:1.3}}>{planet.name}</div>
-          <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:c.accent,marginBottom:2}}>{planet.type}</div>
-          <div style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.62)"}}>{planet.host}</div>
+          <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:15,fontWeight:700,color:"#e8f4ff",letterSpacing:"0.05em",marginBottom:3,lineHeight:1.3}}>{planet.name}</div>
+          <div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:c.accent,marginBottom:2}}>{planet.type}</div>
+          <div style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.62)"}}>{planet.host}</div>
         </div>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 14px",marginBottom:14}}>
@@ -45,21 +45,21 @@ export default function PlanetCard({planet,onClick}) {
           ["Discovered",`${planet.year} · ${planet.scope}`],
         ].map(([k,v])=>(
           <div key={k}>
-            <div style={{fontFamily:"'Space Mono',monospace",fontSize:7,color:"rgba(255,255,255,0.52)",marginBottom:2,letterSpacing:"0.08em"}}>{k.toUpperCase()}</div>
-            <div style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.85)"}}>{v}</div>
+            <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.52)",marginBottom:2,letterSpacing:"0.08em"}}>{k.toUpperCase()}</div>
+            <div style={{fontFamily:"'Space Mono',monospace",fontSize:12,color:"rgba(255,255,255,0.85)"}}>{v}</div>
           </div>
         ))}
       </div>
       <div style={{borderTop:`0.5px solid ${c.border}55`,paddingTop:10,display:"flex",alignItems:"center",gap:8}}>
-        <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.58)",letterSpacing:"0.1em",flexShrink:0}}>ESI</span>
+        <span style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.58)",letterSpacing:"0.1em",flexShrink:0}}>ESI</span>
         <div style={{flex:1,height:3,background:"rgba(255,255,255,0.07)",borderRadius:2}}>
           <div style={{width:`${Math.round(planet.esi*100)}%`,height:"100%",background:`linear-gradient(90deg,${esiCol}99,${esiCol})`,borderRadius:2,boxShadow:`0 0 6px ${esiCol}66`}}/>
         </div>
-        <span style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:esiCol,fontWeight:"bold",minWidth:28,textAlign:"right"}}>{Math.round(planet.esi*100)}%</span>
+        <span style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:esiCol,fontWeight:"bold",minWidth:32,textAlign:"right"}}>{Math.round(planet.esi*100)}%</span>
       </div>
       {onClick && (
         <div style={{textAlign:"right",marginTop:8}}>
-          <span style={{fontFamily:"'Space Mono',monospace",fontSize:8,color:c.accent,letterSpacing:"0.08em"}}>explore →</span>
+          <span style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:c.accent,letterSpacing:"0.08em"}}>explore →</span>
         </div>
       )}
     </div>
