@@ -406,7 +406,7 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
     <div style={{ maxWidth: 960, margin: '0 auto' }}>
 
       {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 16, fontWeight: 900, color: '#e8f4ff', letterSpacing: '0.15em', marginBottom: 5 }}>3D EXOPLANET MAP</div>
           <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.1em' }}>
@@ -421,6 +421,21 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
               <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.62)' }}>{label}</span>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Voted visibility banner */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 12, padding: '10px 16px', background: 'rgba(29,158,117,0.07)', border: '1px solid rgba(29,158,117,0.22)', borderRadius: 10, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#1D9E75', boxShadow: '0 0 14px #1D9E75, 0 0 28px #1D9E7555', flexShrink: 0 }}/>
+          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: '#1D9E75', letterSpacing: '0.08em', fontWeight: 700 }}>VOTED — glows bright &amp; large</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(55,138,221,0.22)', border: '1px solid rgba(55,138,221,0.3)', flexShrink: 0 }}/>
+          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: 'rgba(255,255,255,0.48)', letterSpacing: '0.08em' }}>NOT VOTED — dim &amp; small</span>
+        </div>
+        <div style={{ marginLeft: 'auto', fontFamily: "'Space Mono',monospace", fontSize: 11, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.06em' }}>
+          <span style={{ color: '#1D9E75', fontWeight: 700 }}>{votedCount}</span> of {planets.length} planets voted
         </div>
       </div>
 
@@ -498,21 +513,6 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
             </div>
           </div>
         )}
-
-        {/* Bottom-left: voted legend */}
-        <div style={{ position: 'absolute', bottom: 14, left: 16, pointerEvents: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#1D9E75', boxShadow: '0 0 12px #1D9E75, 0 0 24px #1D9E7566' }}/>
-            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.75)', letterSpacing: '0.08em' }}>VOTED — bright &amp; large</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(55,138,221,0.25)', boxShadow: '0 0 4px rgba(55,138,221,0.2)' }}/>
-            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.38)', letterSpacing: '0.08em' }}>NOT VOTED — dim &amp; small</span>
-          </div>
-          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.06em', marginTop: 2 }}>
-            {votedCount} of {planets.length} planets voted
-          </div>
-        </div>
 
         {/* Bottom-right: size = rating */}
         <div style={{ position: 'absolute', bottom: 14, right: 16, display: 'flex', alignItems: 'center', gap: 6, pointerEvents: 'none' }}>
