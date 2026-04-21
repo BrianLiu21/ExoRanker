@@ -7,7 +7,7 @@ import { useIsMobile } from '../utils/useIsMobile';
 import PlanetCard from './PlanetCard';
 import TierBadge from './primitives/TierBadge';
 
-export default function VoteArena({ planets, user, onVote, onViewDetail, onNextPair, votedIds }) {
+export default function VoteArena({ planets, user, onVote, onViewDetail, onNextPair, votedIds, onPrioritize }) {
   const isMobile = useIsMobile();
   const [pair, setPair] = useState(null);
   const [voted, setVoted] = useState(null);
@@ -18,9 +18,18 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
   const [potdDismissed, setPotdDismissed] = useState(() => {
     try { return localStorage.getItem('er_potd_date') === todayKey; } catch { return false; }
   });
+  const [potdPrioritized, setPotdPrioritized] = useState(() => {
+    try { return localStorage.getItem('er_potd_voted') === todayKey; } catch { return false; }
+  });
   const dismissPotd = () => {
     setPotdDismissed(true);
     try { localStorage.setItem('er_potd_date', todayKey); } catch {}
+  };
+  const handlePrioritize = (planetId) => {
+    if (potdPrioritized) return;
+    setPotdPrioritized(true);
+    try { localStorage.setItem('er_potd_voted', todayKey); } catch {}
+    onPrioritize?.(planetId);
   };
 
   const [showTutorial, setShowTutorial] = useState(!user.tutorialDone && (user.totalVotes || 0) < 3);
@@ -97,22 +106,55 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
 
       {/* Planet of the Day */}
       {potd && !potdDismissed && (
-        <div onClick={() => { dismissPotd(); onViewDetail(potd); }} style={{
-          display: 'flex', alignItems: 'center', gap: 12,
+        <div style={{
           background: 'rgba(29,158,117,0.06)', border: '0.5px solid rgba(29,158,117,0.25)',
-          borderRadius: 10, padding: '9px 16px', marginBottom: 20, cursor: 'pointer',
-          transition: 'background 0.18s, transform 0.2s ease',
-          willChange: 'transform',
-        }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(29,158,117,0.11)'; e.currentTarget.style.transform = 'scale(1.012)'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(29,158,117,0.06)'; e.currentTarget.style.transform = ''; }}>
-          <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#1D9E75', boxShadow: '0 0 8px #1D9E75', flexShrink: 0, animation: 'orb-pulse 2s ease-in-out infinite' }} />
-          <div style={{ flex: 1 }}>
-            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: '#1D9E7588', letterSpacing: '0.15em' }}>PLANET OF THE DAY · </span>
-            <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 11, color: '#1D9E75', fontWeight: 700 }}>{potd.name}</span>
-            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.5)', marginLeft: 8 }}>{potd.type}</span>
+          borderRadius: 12, padding: '14px 18px', marginBottom: 22, position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{ position: 'absolute', top: 0, left: '20%', right: '20%', height: 1, background: 'linear-gradient(90deg,transparent,#1D9E7555,transparent)', pointerEvents: 'none' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 160 }}>
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#1D9E75', boxShadow: '0 0 8px #1D9E75', flexShrink: 0, animation: 'orb-pulse 2s ease-in-out infinite' }} />
+              <div>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: '#1D9E7577', letterSpacing: '0.18em', marginBottom: 2 }}>PLANET OF THE DAY</div>
+                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 700, color: '#e8f4ff' }}>{potd.name}</div>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.38)', marginTop: 1 }}>{potd.type} · {potd.temp}K · {potd.dist} ly</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+              <button
+                disabled={potdPrioritized}
+                onClick={() => handlePrioritize(potd.id)}
+                style={{
+                  fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 700,
+                  padding: '8px 16px', borderRadius: 7, cursor: potdPrioritized ? 'default' : 'pointer',
+                  background: potdPrioritized ? 'rgba(29,158,117,0.1)' : 'rgba(29,158,117,0.18)',
+                  color: potdPrioritized ? '#1D9E7577' : '#1D9E75',
+                  border: potdPrioritized ? '0.5px solid #1D9E7533' : '0.5px solid #1D9E7566',
+                  letterSpacing: '0.08em', transition: 'all 0.18s',
+                }}
+                onMouseEnter={e => { if (!potdPrioritized) e.currentTarget.style.background = 'rgba(29,158,117,0.28)'; }}
+                onMouseLeave={e => { if (!potdPrioritized) e.currentTarget.style.background = 'rgba(29,158,117,0.18)'; }}>
+                {potdPrioritized ? '✓ PRIORITIZED' : '↑ PRIORITIZE'}
+              </button>
+              <button
+                onClick={() => { dismissPotd(); onViewDetail(potd); }}
+                style={{
+                  fontFamily: "'Space Mono',monospace", fontSize: 9,
+                  padding: '8px 12px', borderRadius: 7, cursor: 'pointer',
+                  background: 'transparent', color: 'rgba(255,255,255,0.4)',
+                  border: '0.5px solid rgba(255,255,255,0.1)', transition: 'all 0.18s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.72)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}>
+                view →
+              </button>
+              <button
+                onClick={dismissPotd}
+                style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.22)', cursor: 'pointer', fontSize: 14, padding: '4px 6px', lineHeight: 1 }}>
+                ×
+              </button>
+            </div>
           </div>
-          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.55)' }}>view →</span>
         </div>
       )}
 

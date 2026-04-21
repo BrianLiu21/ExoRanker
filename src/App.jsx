@@ -258,6 +258,31 @@ export default function App() {
     setLastVotedPair(new Set([aId, bId]));
   }, [user, planets, allUsers]);
 
+  const handlePrioritize = useCallback((planetId) => {
+    setPlanets(prev => {
+      const planet = prev.find(p => p.id === planetId);
+      if (!planet) return prev;
+      // Treat as a win against a median-rated virtual opponent (r=1500, rd=350)
+      const virtual = { r: 1500, rd: 350 };
+      const phi = (planet.rd || 350) / 173.7178;
+      const phiV = virtual.rd / 173.7178;
+      const gV = 1 / Math.sqrt(1 + 3 * phiV * phiV / (Math.PI * Math.PI));
+      const mu = ((planet.r || 1500) - 1500) / 173.7178;
+      const muV = 0;
+      const E = 1 / (1 + Math.exp(-gV * (mu - muV)));
+      const phiNew = 1 / Math.sqrt(1 / (phi * phi) + 1 / (gV * gV * E * (1 - E)));
+      const newR = Math.round((planet.r || 1500) + phiNew * phiNew * gV * (1 - E) * 173.7178);
+      const newRd = Math.round(phiNew * 173.7178);
+      const updated = { ...planet, r: newR, rd: Math.max(50, newRd), matchups: (planet.matchups || 0) + 1 };
+      const next = prev.map(p => p.id === planetId ? updated : p);
+      const m = {};
+      next.forEach(p => m[p.id] = { r: p.r, rd: p.rd, sigma: p.sigma, matchups: p.matchups });
+      saveLocal("er_planets1", m);
+      sb.upsert("planets", { id: updated.id, r: updated.r, rd: updated.rd, sigma: updated.sigma, matchups: updated.matchups });
+      return next;
+    });
+  }, [planets]);
+
   const goDetail = (planet) => { setPrevView(view); setDetail(planet); setView("detail"); };
   const goBack = () => { setView(prevView); setDetail(null); };
 
@@ -386,7 +411,7 @@ export default function App() {
         {/* Keep VoteArena mounted when navigating to detail so the pair is preserved */}
         {(view==="vote" || (view==="detail" && prevView==="vote")) && (
           <div style={{display:view==="vote"?"block":"none"}}>
-            <VoteArena planets={planets} user={user} onVote={handleVote} onViewDetail={goDetail} onNextPair={()=>setToast(null)} votedIds={votedIds}/>
+            <VoteArena planets={planets} user={user} onVote={handleVote} onViewDetail={goDetail} onNextPair={()=>setToast(null)} votedIds={votedIds} onPrioritize={handlePrioritize}/>
           </div>
         )}
         {view==="planets" && <PlanetRankings planets={planets} onViewDetail={goDetail} lastVotedIds={lastVotedPair}/>}
