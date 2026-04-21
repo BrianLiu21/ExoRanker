@@ -403,7 +403,7 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
       bgGeo.dispose(); bgMat.dispose();
       if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
     };
-  }, [threeReady, planets, votedIds]);
+  }, [threeReady, planets]);
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto' }}>

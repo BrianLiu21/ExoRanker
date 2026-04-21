@@ -300,7 +300,7 @@ export default function App() {
   const sorted = [...planets].sort((a, b) => (b.r||1500) - (a.r||1500));
   const topPlanet = sorted[0];
 
-  const CSS = `${FONTS}*{box-sizing:border-box;margin:0;padding:0}body{background:#020a12}@keyframes orb-pulse{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}@keyframes shimmer{0%,100%{opacity:.35}50%{opacity:.7}}@keyframes rare-pulse{0%,100%{opacity:.7}50%{opacity:1}}@keyframes rainbow-shift{0%{filter:hue-rotate(0deg) brightness(1.4)}100%{filter:hue-rotate(360deg) brightness(1.4)}}@keyframes rainbow-radiate{0%,100%{text-shadow:0 0 10px #ff0080,0 0 30px #ff008088,0 0 60px #ff008044,0 0 120px #ff008022}25%{text-shadow:0 0 10px #00ffcc,0 0 30px #00ffcc88,0 0 60px #00ffcc44,0 0 120px #00ffcc22}50%{text-shadow:0 0 10px #0080ff,0 0 30px #0080ff88,0 0 60px #0080ff44,0 0 120px #0080ff22}75%{text-shadow:0 0 10px #ffcc00,0 0 30px #ffcc0088,0 0 60px #ffcc0044,0 0 120px #ffcc0022}}@keyframes float-up{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-52px) scale(0.8)}}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#020a12}::-webkit-scrollbar-thumb{background:#1D9E7533;border-radius:2px}.nav-btn{transition:all 0.18s ease!important}.nav-btn:hover{transform:scale(1.09)!important;opacity:1!important}.signout-btn{transition:all 0.18s ease!important}.signout-btn:hover{transform:scale(1.08)!important;color:rgba(255,255,255,0.55)!important;border-color:rgba(255,255,255,0.28)!important}`;
+  const CSS = `${FONTS}*{box-sizing:border-box;margin:0;padding:0}body{background:#020a12}@keyframes orb-pulse{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}@keyframes shimmer{0%,100%{opacity:.35}50%{opacity:.7}}@keyframes rare-pulse{0%,100%{opacity:.7}50%{opacity:1}}@keyframes rainbow-shift{0%{filter:hue-rotate(0deg) brightness(1.4)}100%{filter:hue-rotate(360deg) brightness(1.4)}}@keyframes rainbow-radiate{0%,100%{text-shadow:0 0 10px #ff0080,0 0 30px #ff008088,0 0 60px #ff008044,0 0 120px #ff008022}25%{text-shadow:0 0 10px #00ffcc,0 0 30px #00ffcc88,0 0 60px #00ffcc44,0 0 120px #00ffcc22}50%{text-shadow:0 0 10px #0080ff,0 0 30px #0080ff88,0 0 60px #0080ff44,0 0 120px #0080ff22}75%{text-shadow:0 0 10px #ffcc00,0 0 30px #ffcc0088,0 0 60px #ffcc0044,0 0 120px #ffcc0022}}@keyframes float-up{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-52px) scale(0.8)}}@keyframes slide-in-bottom{from{opacity:0;transform:translateX(-50%) translateY(18px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes fade-in-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@keyframes nav-glow{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px #1D9E7522}}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#020a12}::-webkit-scrollbar-thumb{background:#1D9E7533;border-radius:2px}::selection{background:#1D9E7533;color:#e8f4ff}.nav-btn{transition:all 0.18s ease!important}.nav-btn:hover{transform:scale(1.09)!important;opacity:1!important}.signout-btn{transition:all 0.18s ease!important}.signout-btn:hover{transform:scale(1.08)!important;color:rgba(255,255,255,0.55)!important;border-color:rgba(255,255,255,0.28)!important}.page-content{animation:fade-in-up 0.32s ease both}`;
 
   const Header = ({showNav=true, onSignOut=null}) => {
     const mob = useIsMobile();
@@ -347,17 +347,19 @@ export default function App() {
       </div>
     );
 
-    // ── Desktop (unchanged from original) ──
+    // ── Desktop ──
     return (
-      <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,10,18,0.93)",backdropFilter:"blur(10px)",borderBottom:"0.5px solid rgba(255,255,255,0.06)",padding:"0 24px"}}>
+      <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,9,17,0.96)",backdropFilter:"blur(14px)",borderBottom:"0.5px solid rgba(255,255,255,0.07)",padding:"0 24px"}}>
+        {/* Gradient accent line at very top */}
+        <div style={{position:"absolute",top:0,left:0,right:0,height:1,background:"linear-gradient(90deg, transparent 0%, #1D9E7544 30%, #378ADD33 60%, transparent 100%)",pointerEvents:"none"}}/>
         <div style={{maxWidth:960,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             {SVG_LOGO}
             <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:"#e8f4ff",letterSpacing:"0.12em",marginRight:"-0.12em"}}>EXO</span><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:400,color:"#1D9E75",letterSpacing:"0.12em"}}>RANKER</span>
-            {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4}} title="Shared backend connected"/>}
+            {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4,animation:"orb-pulse 2.5s ease-in-out infinite"}} title="Shared backend connected"/>}
           </div>
-          {showNav&&<div style={{display:"flex",gap:3}}>{DESKTOP_NAV.map(([v,l])=>(
-            <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:11,letterSpacing:"0.12em",padding:"7px 12px",borderRadius:6,cursor:"pointer",background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.52)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
+          {showNav&&<div style={{display:"flex",gap:2}}>{DESKTOP_NAV.map(([v,l])=>(
+            <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:10,letterSpacing:"0.1em",padding:"7px 13px",borderRadius:7,cursor:"pointer",background:(view===v&&view!=="detail")?"rgba(29,158,117,0.13)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.48)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
           ))}</div>}
           {userInfo}
         </div>
@@ -392,16 +394,29 @@ export default function App() {
       <Header onSignOut={signOut}/>
 
       {view !== "detail" && (
-        <div style={{background:"rgba(3,10,18,0.65)",borderBottom:"0.5px solid rgba(255,255,255,0.04)",padding:"8px 24px"}}>
-          <div style={{maxWidth:960,margin:"0 auto",display:"flex",gap:24,alignItems:"center",flexWrap:"wrap"}}>
-            <div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.55)"}}>TOP PLANET: <span style={{color:"#FFD700"}}>{topPlanet?.name}</span><span style={{margin:"0 8px",color:"rgba(255,255,255,0.3)"}}>|</span><span style={{color:"#1D9E75"}}>{topPlanet?.r||1500}<span style={{opacity:0.65,fontSize:10}}> ±{topPlanet?.rd||350}</span></span></div>
-            <div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.55)"}}>YOUR JR: <span style={{color:getEffectiveTier(user.jr||1000,user.mode).color}}>{user.mode==="advanced"?user.jr||1000:"learn mode"}</span></div>
-            <div style={{marginLeft:"auto",fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.42)"}}>{planetCount} planets · {liveData?"live NASA data":"built-in dataset"}{SB_ON?" · shared backend":""}</div>
+        <div style={{background:"rgba(2,8,16,0.7)",borderBottom:"0.5px solid rgba(255,255,255,0.05)",padding:"6px 24px"}}>
+          <div style={{maxWidth:960,margin:"0 auto",display:"flex",gap:20,alignItems:"center",flexWrap:"wrap"}}>
+            <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.38)"}}>
+              <span style={{color:"rgba(255,255,255,0.25)"}}>TOP · </span>
+              <span style={{color:"#EF9F27",fontWeight:"bold"}}>{topPlanet?.name}</span>
+              <span style={{margin:"0 6px",color:"rgba(255,255,255,0.2)"}}>·</span>
+              <span style={{color:"#1D9E75"}}>{topPlanet?.r||1500}</span>
+              <span style={{opacity:0.45,fontSize:8}}> ±{topPlanet?.rd||350}</span>
+            </div>
+            <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.38)"}}>
+              <span style={{color:"rgba(255,255,255,0.25)"}}>JR · </span>
+              <span style={{color:getEffectiveTier(user.jr||1000,user.mode).color}}>
+                {user.mode==="advanced"?user.jr||1000:"learn mode"}
+              </span>
+            </div>
+            <div style={{marginLeft:"auto",fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.28)"}}>
+              {planetCount} planets · {liveData?"live NASA":"built-in"}{SB_ON?" · live sync":""}
+            </div>
           </div>
         </div>
       )}
 
-      <div style={{padding:"36px 24px 80px",position:"relative",zIndex:1}}>
+      <div className="page-content" style={{padding:"36px 24px 80px",position:"relative",zIndex:1}}>
         {/* Keep VoteArena mounted when navigating to detail so the pair is preserved */}
         {(view==="vote" || (view==="detail" && prevView==="vote")) && (
           <div style={{display:view==="vote"?"block":"none"}}>
