@@ -137,7 +137,7 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
                 {potdPrioritized ? '✓ PRIORITIZED' : '↑ PRIORITIZE'}
               </button>
               <button
-                onClick={() => { dismissPotd(); onViewDetail(potd); }}
+                onClick={() => { onViewDetail(potd); }}
                 style={{
                   fontFamily: "'Space Mono',monospace", fontSize: 9,
                   padding: '8px 12px', borderRadius: 7, cursor: 'pointer',
