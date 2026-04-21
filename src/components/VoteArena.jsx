@@ -25,6 +25,7 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
     setPotdPrioritized(true);
     try { localStorage.setItem('er_potd_voted', todayKey); } catch {}
     onPrioritize?.(planetId);
+    setTimeout(() => setPotdDismissed(true), 800);
   };
 
   const [showTutorial, setShowTutorial] = useState(!user.tutorialDone && (user.totalVotes || 0) < 3);
