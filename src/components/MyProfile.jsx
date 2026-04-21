@@ -2,8 +2,7 @@ import { getEffectiveTier, USER_ELO_TIERS } from '../utils/userTiers';
 import { QUIZ_LENGTH } from '../data/quiz';
 import TierBadge from './primitives/TierBadge';
 
-export default function MyProfile({ user, onRetakeQuiz, onSwitchToAdvanced, onSignOut }) {
-  const isAdvanced = user.mode === 'advanced';
+export default function MyProfile({ user, onCalibrate, onSignOut }) {
   const tier = getEffectiveTier(user.jr || 1000, user.mode);
   const jr = user.jr || 1100;
 
@@ -13,32 +12,36 @@ export default function MyProfile({ user, onRetakeQuiz, onSwitchToAdvanced, onSi
   const initial = (user.username || '?')[0].toUpperCase();
 
   const STATS = [
-    { k: 'JR', v: isAdvanced ? jr : '—', color: isAdvanced ? tier.color : null, large: true },
+    { k: 'JR', v: jr, color: tier.color, large: true },
     { k: 'Accuracy', v: user.totalVotes > 0 ? `${Math.round(user.accuracy)}%` : '—', color: user.accuracy >= 65 ? '#1D9E75' : user.accuracy >= 45 ? '#EF9F27' : null },
-    { k: 'Vote weight', v: isAdvanced ? `${tier.weight}×` : '0× (learn)' },
-    { k: 'Influence', v: isAdvanced ? Math.round(user.influence) : '—' },
+    { k: 'Vote weight', v: `${tier.weight}×` },
+    { k: 'Influence', v: Math.round(user.influence || 0) },
     { k: 'Streak', v: user.streak || 0, color: (user.streak || 0) >= 5 ? '#EF9F27' : null },
     { k: 'Best streak', v: user.bestStreak || 0 },
     { k: 'Total votes', v: user.totalVotes },
-    { k: 'Quiz score', v: `${user.quizScore ?? 0}/${QUIZ_LENGTH}` },
+    { k: 'Quiz score', v: user.quizScore ? `${user.quizScore}/${QUIZ_LENGTH}` : '—' },
   ];
 
   return (
     <div style={{ maxWidth: 560, margin: '0 auto' }}>
 
-      {/* Learn mode banner */}
-      {!isAdvanced && (
-        <div style={{ background: 'rgba(55,138,221,0.07)', border: '1px solid #378ADD33', borderRadius: 14, padding: '20px 24px', marginBottom: 16, textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, left: '20%', right: '20%', height: 1, background: 'linear-gradient(90deg, transparent, #378ADD55, transparent)' }} />
-          <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 700, color: '#378ADD88', marginBottom: 6, letterSpacing: '0.12em' }}>LEARN MODE</div>
-          <div style={{ fontFamily: "'Crimson Pro',serif", fontSize: 14, color: 'rgba(255,255,255,0.48)', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 16 }}>
-            Your votes build intuition but don't affect the shared JWST research dataset. Take the knowledge quiz to contribute for real.
+      {/* Calibration card — shown until quiz taken */}
+      {!user.quizScore && (
+        <div style={{ background: 'rgba(127,119,221,0.07)', border: '0.5px solid #7F77DD2a', borderRadius: 14, padding: '18px 22px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, left: '20%', right: '20%', height: 1, background: 'linear-gradient(90deg, transparent, #7F77DD44, transparent)' }} />
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, color: '#7F77DD88', letterSpacing: '0.18em', marginBottom: 6 }}>CALIBRATION TEST AVAILABLE</div>
+              <div style={{ fontFamily: "'Crimson Pro',serif", fontSize: 13, color: 'rgba(255,255,255,0.48)', lineHeight: 1.6 }}>
+                Take the knowledge quiz to fast-track your Judgment Rating to where it should be — skipping the grind for science you already know.
+              </div>
+            </div>
+            <button onClick={onCalibrate} style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 700, padding: '10px 18px', borderRadius: 8, cursor: 'pointer', background: 'rgba(127,119,221,0.14)', color: '#7F77DD', border: '0.5px solid #7F77DD44', letterSpacing: '0.08em', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.18s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(127,119,221,0.24)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(127,119,221,0.14)'; }}>
+              CALIBRATE JR →
+            </button>
           </div>
-          <button onClick={onSwitchToAdvanced} style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 700, padding: '11px 28px', borderRadius: 8, cursor: 'pointer', background: 'rgba(29,158,117,0.15)', color: '#1D9E75', border: '1px solid #1D9E7555', letterSpacing: '0.1em', transition: 'all 0.18s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(29,158,117,0.25)'; e.currentTarget.style.boxShadow = '0 0 20px #1D9E7522'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(29,158,117,0.15)'; e.currentTarget.style.boxShadow = ''; }}>
-            TAKE QUIZ → CONTRIBUTE
-          </button>
         </div>
       )}
 

@@ -152,16 +152,12 @@ export default function App() {
 
   const saveLocal = (key, val) => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} };
 
-  const handleAccount = (username, mode) => {
-    const u = { username, mode, quizScore:0, jr:1000, totalVotes:0, weightedCorrect:0, weightedTotal:0, accuracy:0, influence:0, streak:0, bestStreak:0, voteHistory:[], tutorialDone:false };
+  const handleAccount = (username) => {
+    const u = { username, mode:"standard", quizScore:0, jr:1000, totalVotes:0, weightedCorrect:0, weightedTotal:0, accuracy:0, influence:0, streak:0, bestStreak:0, voteHistory:[], tutorialDone:false };
     setUser(u);
-    if (mode === "advanced") {
-      setStage("quiz");
-    } else {
-      saveLocal("er_user1", u);
-      sb.upsert("users", u);
-      setStage("app");
-    }
+    saveLocal("er_user1", u);
+    sb.upsert("users", u);
+    setStage("app");
   };
 
   const handleLogin = (existingUser) => {
@@ -203,31 +199,23 @@ export default function App() {
     const streakMult = streakInfo.mult;
     const effectiveK = Math.round(tier.k * streakMult);
 
-    const isAdvanced = user.mode === "advanced";
-    // ELO winner = PHI-correct planet, not user's vote.
-    // This means voting for the wrong planet pushes the rankings toward ground truth
-    // rather than rewarding the user's incorrect judgment with ELO for their chosen planet.
-    // Planet ratings update via Glicko-2 - advanced mode only
-    // Winner = PHI-correct planet so wrong votes push rankings toward ground truth
+    // Winner = PHI-correct planet so wrong votes push rankings toward ground truth.
+    // All users affect planet rankings, weighted by their JR tier (1×–3×).
     const glickoWinnerId = correctId || winnerId;
-    if (isAdvanced) {
-      setPlanets(prev => {
-        const pA = prev.find(x => x.id === aId);
-        const pB = prev.find(x => x.id === bId);
-        if (!pA || !pB) return prev;
-        const { pa: newA, pb: newB } = glicko2Matchup(pA, pB, glickoWinnerId, tier.weight);
-        const next = prev.map(p =>
-          p.id === aId ? newA : p.id === bId ? newB : p
-        );
-        // Persist locally
-        const m = {};
-        next.forEach(p => m[p.id] = { r:p.r, rd:p.rd, sigma:p.sigma, matchups:p.matchups });
-        saveLocal("er_planets1", m);
-        // Async Supabase sync
-        [newA, newB].forEach(p => sb.upsert("planets", { id:p.id, r:p.r, rd:p.rd, sigma:p.sigma, matchups:p.matchups }));
-        return next;
-      });
-    }
+    setPlanets(prev => {
+      const pA = prev.find(x => x.id === aId);
+      const pB = prev.find(x => x.id === bId);
+      if (!pA || !pB) return prev;
+      const { pa: newA, pb: newB } = glicko2Matchup(pA, pB, glickoWinnerId, tier.weight);
+      const next = prev.map(p =>
+        p.id === aId ? newA : p.id === bId ? newB : p
+      );
+      const m = {};
+      next.forEach(p => m[p.id] = { r:p.r, rd:p.rd, sigma:p.sigma, matchups:p.matchups });
+      saveLocal("er_planets1", m);
+      [newA, newB].forEach(p => sb.upsert("planets", { id:p.id, r:p.r, rd:p.rd, sigma:p.sigma, matchups:p.matchups }));
+      return next;
+    });
 
     // Update voted IDs (unlocks detail breakdown)
     setVotedIds(prev => {
@@ -265,10 +253,10 @@ export default function App() {
       if (newTier.id !== prevTier.id) {
         const wentUp = newTier.weight > prevTier.weight;
         const reasons = {
-          astronomer: wentUp ? "JR reached 1400. Expert-level judgment confirmed." : "JR dropped below 1400",
-          analyst:    wentUp ? "JR reached 1200. Strong grasp of habitability factors." : "JR dropped below 1200",
-          observer:   wentUp ? "JR reached 1050. Working knowledge of exoplanet science established." : "JR dropped below 1050",
-          explorer:   wentUp ? "" : "JR dropped below 1050. Keep voting to rebuild your tier.",
+          astronomer: wentUp ? "JR reached 1400. Expert-level judgment confirmed. Votes carry 3× weight." : "JR dropped below 1400.",
+          analyst:    wentUp ? "JR reached 1200. Your votes now carry 2× weight in planet rankings." : "JR dropped below 1200.",
+          observer:   wentUp ? "JR reached 1050. Your votes now carry 1.5× weight in planet rankings." : "JR dropped below 1050.",
+          explorer:   wentUp ? "" : "JR dropped below 1050. Keep voting to rebuild.",
         };
         setTimeout(() => setTierUpgradeToast({ tier:newTier, reason:reasons[newTier.id]||"", wentUp }), 1200);
       }
@@ -406,7 +394,7 @@ export default function App() {
             <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.38)"}}>
               <span style={{color:"rgba(255,255,255,0.25)"}}>JR · </span>
               <span style={{color:getEffectiveTier(user.jr||1000,user.mode).color}}>
-                {user.mode==="advanced"?user.jr||1000:"learn mode"}
+                {user.jr||1000}
               </span>
             </div>
             <div style={{marginLeft:"auto",fontFamily:"'Space Mono',monospace",fontSize:8,color:"rgba(255,255,255,0.28)"}}>
@@ -464,7 +452,7 @@ export default function App() {
         })()}
         {view==="map"     && <ExoMap planets={planets} votedIds={votedIds} onViewDetail={goDetail}/>}
         {view==="users"   && <UserLeaderboard allUsers={allUsers} currentUser={user} lastSync={lastSync}/>}
-        {view==="profile" && <MyProfile user={user} onRetakeQuiz={()=>setStage("quiz")} onSwitchToAdvanced={()=>{setUser(u=>{const n={...u,mode:"advanced"};saveLocal("er_user1",n);return n;});setStage("quiz");}} onSignOut={signOut}/>}
+        {view==="profile" && <MyProfile user={user} onCalibrate={()=>setStage("quiz")} onSignOut={signOut}/>}
         {view==="detail"  && detail && <PlanetDetail planet={detail} onBack={goBack} voted={votedIds.has(detail.id)} userMode={user.mode}/>}
       </div>
 

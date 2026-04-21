@@ -5,8 +5,7 @@ import TierBadge from './primitives/TierBadge';
 const MEDAL = ['#FFD700', '#C0C0C0', '#CD7F32'];
 
 export default function UserLeaderboard({ allUsers, currentUser, lastSync }) {
-  const adv = allUsers.filter(u => u.mode === 'advanced');
-  const list = [...adv].sort((a, b) => (b.jr || 1000) - (a.jr || 1000));
+  const list = [...allUsers].sort((a, b) => (b.jr || 1000) - (a.jr || 1000));
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto' }}>

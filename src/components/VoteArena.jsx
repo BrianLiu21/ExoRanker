@@ -23,7 +23,7 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
     try { localStorage.setItem('er_potd_date', todayKey); } catch {}
   };
 
-  const [showTutorial, setShowTutorial] = useState(user.mode === 'beginner' && !user.tutorialDone);
+  const [showTutorial, setShowTutorial] = useState(!user.tutorialDone && (user.totalVotes || 0) < 3);
   const dismissTutorial = () => {
     setShowTutorial(false);
     if (!user.tutorialDone) {
@@ -125,17 +125,10 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
           Which exoplanet deserves limited telescope time more?
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
-          {user.mode === 'beginner' ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(55,138,221,0.09)', border: '0.5px solid #378ADD33', borderRadius: 20, padding: '4px 14px' }}>
-              <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#378ADD' }} />
-              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: '#378ADD77', letterSpacing: '0.08em' }}>LEARN MODE · practice votes</span>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <TierBadge tier={tier} sm />
-              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.38)' }}>±{Math.round(tier.k * streakInfo.mult)} JR per vote</span>
-            </div>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <TierBadge tier={tier} sm />
+            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.38)' }}>±{Math.round(tier.k * streakInfo.mult)} JR · {tier.weight}× weight</span>
+          </div>
           {streak >= 3 && user.mode === 'advanced' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: `${streakInfo.color}15`, border: `0.5px solid ${streakInfo.color}44`, borderRadius: 20, padding: '3px 12px', animation: 'rare-pulse 1.5s ease-in-out infinite' }}>
               <div style={{ width: 4, height: 4, borderRadius: '50%', background: streakInfo.color, boxShadow: `0 0 6px ${streakInfo.color}` }} />
