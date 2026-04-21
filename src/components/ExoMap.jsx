@@ -103,7 +103,9 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
   const isMobile   = useIsMobile();
   const [threeReady, setThreeReady] = useState(!!window.__THREE__);
   const [info, setInfo]   = useState(null); // { planet, x, y }
-  const totalCommunityVotes = planets.reduce((s, p) => s + (p.matchups || 0), 0);
+  const eloValues = planets.map(p => p.r || 1500);
+  const minElo = Math.min(...eloValues);
+  const maxElo = Math.max(...eloValues);
 
   // ── Load Three.js once (reuse if already loaded) ─────────────────────────
   useEffect(() => {
@@ -165,20 +167,18 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
     const sizeArr  = [];
     const validPlanets = [];
 
-    const maxMatchups = Math.max(1, ...planets.map(p => p.matchups || 0));
+    const eloRange = Math.max(1, maxElo - minElo);
 
     for (const p of planets) {
       const xyz = planetXYZ(p);
       posArr.push(xyz[0], xyz[1], xyz[2]);
 
-      const rgb  = HUE_RGB[p.hue] || HUE_RGB.blue;
-      const norm = Math.min(1, Math.max(0, ((p.r || 1500) - 1200) / 900));
-      // Popularity based on global matchup count (log scale so outliers don't dominate)
-      const matchupNorm = Math.min(1, Math.log1p(p.matchups || 0) / Math.log1p(maxMatchups));
-      const brightness = 0.08 + matchupNorm * 0.82;
+      const rgb = HUE_RGB[p.hue] || HUE_RGB.blue;
+      const eloNorm = Math.min(1, Math.max(0, ((p.r || 1500) - minElo) / eloRange));
+      const brightness = 0.08 + eloNorm * 0.92;
       colorArr.push(rgb[0] / 255 * brightness, rgb[1] / 255 * brightness, rgb[2] / 255 * brightness);
 
-      sizeArr.push(1.0 + matchupNorm * 7.0 + norm * 1.5);
+      sizeArr.push(1.0 + eloNorm * 8.5);
       validPlanets.push(p);
     }
 
@@ -427,18 +427,18 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
         </div>
       </div>
 
-      {/* Community vote heatmap banner */}
+      {/* ELO heatmap banner */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 12, padding: '10px 16px', background: 'rgba(29,158,117,0.07)', border: '1px solid rgba(29,158,117,0.22)', borderRadius: 10, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#1D9E75', boxShadow: '0 0 14px #1D9E75, 0 0 28px #1D9E7555', flexShrink: 0 }}/>
-          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: '#1D9E75', letterSpacing: '0.08em', fontWeight: 700 }}>POPULAR — many community votes</span>
+          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: '#1D9E75', letterSpacing: '0.08em', fontWeight: 700 }}>BRIGHT — high community rating</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(55,138,221,0.22)', border: '1px solid rgba(55,138,221,0.3)', flexShrink: 0 }}/>
-          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: 'rgba(255,255,255,0.48)', letterSpacing: '0.08em' }}>UNSEEN — few or no votes</span>
+          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: 'rgba(255,255,255,0.48)', letterSpacing: '0.08em' }}>DIM — low community rating</span>
         </div>
         <div style={{ marginLeft: 'auto', fontFamily: "'Space Mono',monospace", fontSize: 11, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.06em' }}>
-          <span style={{ color: '#1D9E75', fontWeight: 700 }}>{totalCommunityVotes.toLocaleString()}</span> community votes across {planets.length} planets
+          <span style={{ color: '#1D9E75', fontWeight: 700 }}>{planets.length}</span> planets · top rated <span style={{ color: '#1D9E75', fontWeight: 700 }}>{maxElo}</span>
         </div>
       </div>
 
@@ -484,9 +484,7 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
               <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 700, color: '#e8f4ff' }}>
                 {info.planet.name}
               </div>
-              {(info.planet.matchups || 0) > 0 && (
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: '#1D9E75', background: 'rgba(29,158,117,0.15)', border: '0.5px solid #1D9E7566', borderRadius: 4, padding: '2px 6px', letterSpacing: '0.08em' }}>{info.planet.matchups}v</div>
-              )}
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: '#1D9E75', background: 'rgba(29,158,117,0.15)', border: '0.5px solid #1D9E7566', borderRadius: 4, padding: '2px 6px', letterSpacing: '0.08em' }}>{info.planet.r || 1500}</div>
               {votedIds && votedIds.has(info.planet.id) && (
                 <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: '#378ADD', background: 'rgba(55,138,221,0.12)', border: '0.5px solid #378ADD55', borderRadius: 4, padding: '2px 6px', letterSpacing: '0.08em' }}>YOU VOTED</div>
               )}
@@ -496,9 +494,9 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
             </div>
             <div style={{ display: 'flex', gap: 16 }}>
               <div>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.1em', marginBottom: 3 }}>VOTES</div>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.1em', marginBottom: 3 }}>RATING</div>
                 <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 14, fontWeight: 'bold', color: HUE_HEX[info.planet.hue] || '#378ADD' }}>
-                  {info.planet.matchups || 0}
+                  {info.planet.r || 1500}
                 </div>
               </div>
               <div>
@@ -528,7 +526,7 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
               <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.45)' }}>{label}</span>
             </div>
           ))}
-          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.38)', marginLeft: 4 }}>COMMUNITY VOTES</span>
+          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.38)', marginLeft: 4 }}>COMMUNITY RATING</span>
         </div>
       </div>
 
