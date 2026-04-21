@@ -1,10 +1,9 @@
 import { getEffectiveTier, USER_ELO_TIERS } from '../utils/userTiers';
-import { QUIZ_LENGTH } from '../data/quiz';
 import TierBadge from './primitives/TierBadge';
 
-export default function MyProfile({ user, onCalibrate, onSignOut }) {
-  const tier = getEffectiveTier(user.jr || 1000, user.mode);
-  const jr = user.jr || 1100;
+export default function MyProfile({ user, onSignOut }) {
+  const tier = getEffectiveTier(user.jr || 1000);
+  const jr = user.jr || 1000;
 
   const sorted = [...USER_ELO_TIERS].sort((a, b) => a.minElo - b.minElo);
   const nextTier = sorted.find(t => t.minElo > jr);
@@ -19,31 +18,10 @@ export default function MyProfile({ user, onCalibrate, onSignOut }) {
     { k: 'Streak', v: user.streak || 0, color: (user.streak || 0) >= 5 ? '#EF9F27' : null },
     { k: 'Best streak', v: user.bestStreak || 0 },
     { k: 'Total votes', v: user.totalVotes },
-    { k: 'Quiz score', v: user.quizScore ? `${user.quizScore}/${QUIZ_LENGTH}` : '—' },
   ];
 
   return (
     <div style={{ maxWidth: 560, margin: '0 auto' }}>
-
-      {/* Calibration card — shown until quiz taken */}
-      {!user.quizScore && (
-        <div style={{ background: 'rgba(127,119,221,0.07)', border: '0.5px solid #7F77DD2a', borderRadius: 14, padding: '18px 22px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, left: '20%', right: '20%', height: 1, background: 'linear-gradient(90deg, transparent, #7F77DD44, transparent)' }} />
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, color: '#7F77DD88', letterSpacing: '0.18em', marginBottom: 6 }}>CALIBRATION TEST AVAILABLE</div>
-              <div style={{ fontFamily: "'Crimson Pro',serif", fontSize: 13, color: 'rgba(255,255,255,0.48)', lineHeight: 1.6 }}>
-                Take the knowledge quiz to fast-track your Judgment Rating to where it should be — skipping the grind for science you already know.
-              </div>
-            </div>
-            <button onClick={onCalibrate} style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 700, padding: '10px 18px', borderRadius: 8, cursor: 'pointer', background: 'rgba(127,119,221,0.14)', color: '#7F77DD', border: '0.5px solid #7F77DD44', letterSpacing: '0.08em', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.18s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(127,119,221,0.24)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(127,119,221,0.14)'; }}>
-              CALIBRATE JR →
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Profile card */}
       <div style={{ background: 'rgba(5,12,20,0.9)', border: `1px solid ${tier.color}44`, borderRadius: 18, padding: '28px 28px 24px', position: 'relative', overflow: 'hidden' }}>
@@ -56,10 +34,7 @@ export default function MyProfile({ user, onCalibrate, onSignOut }) {
           </div>
           <div>
             <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 700, color: '#e8f4ff', marginBottom: 5 }}>{user.username}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <TierBadge tier={tier} />
-              {!isAdvanced && <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: '#378ADD77' }}>LEARN MODE</span>}
-            </div>
+            <TierBadge tier={tier} />
           </div>
         </div>
 
@@ -117,47 +92,39 @@ export default function MyProfile({ user, onCalibrate, onSignOut }) {
           </div>
         )}
 
-        {/* JR Tier ladder — advanced only */}
-        {isAdvanced && (
-          <>
-            <div style={{ background: 'rgba(0,0,0,0.22)', borderRadius: 10, padding: '14px 16px', marginBottom: 14 }}>
-              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.12em', marginBottom: 12 }}>JR TIER LADDER</div>
-              {[...USER_ELO_TIERS].reverse().map(t => {
-                const active = t.id === tier.id;
-                const achieved = jr >= t.minElo;
-                return (
-                  <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 7, padding: '6px 10px', borderRadius: 7, background: active ? `${t.color}14` : 'transparent', border: active ? `0.5px solid ${t.color}33` : 'none' }}>
-                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: achieved ? t.color : 'rgba(255,255,255,0.12)', boxShadow: active ? `0 0 8px ${t.color}` : 'none', flexShrink: 0 }} />
-                    <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, color: achieved ? t.color : 'rgba(255,255,255,0.2)', fontWeight: active ? 700 : 400, flex: 1 }}>{t.label}</span>
-                    <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(255,255,255,0.22)' }}>≥{t.minElo} · {t.weight}×</span>
-                    {active && <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: t.color }}>← {jr}</span>}
-                  </div>
-                );
-              })}
-              {nextTier && (
-                <div style={{ marginTop: 10, paddingTop: 10, borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                    <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(255,255,255,0.22)' }}>to {nextTier.label}</span>
-                    <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: nextTier.color }}>{eloToNext} JR needed</span>
-                  </div>
-                  <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
-                    <div style={{ width: `${Math.round(((jr - (tier.minElo || 0)) / (nextTier.minElo - (tier.minElo || 0))) * 100)}%`, height: '100%', background: nextTier.color, borderRadius: 2, transition: 'width 0.5s', boxShadow: `0 0 6px ${nextTier.color}44` }} />
-                  </div>
-                </div>
-              )}
+        {/* JR Tier ladder */}
+        <div style={{ background: 'rgba(0,0,0,0.22)', borderRadius: 10, padding: '14px 16px', marginBottom: 14 }}>
+          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.12em', marginBottom: 12 }}>JR TIER LADDER</div>
+          {[...USER_ELO_TIERS].reverse().map(t => {
+            const active = t.id === tier.id;
+            const achieved = jr >= t.minElo;
+            return (
+              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 7, padding: '6px 10px', borderRadius: 7, background: active ? `${t.color}14` : 'transparent', border: active ? `0.5px solid ${t.color}33` : 'none' }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: achieved ? t.color : 'rgba(255,255,255,0.12)', boxShadow: active ? `0 0 8px ${t.color}` : 'none', flexShrink: 0 }} />
+                <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, color: achieved ? t.color : 'rgba(255,255,255,0.2)', fontWeight: active ? 700 : 400, flex: 1 }}>{t.label}</span>
+                <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(255,255,255,0.22)' }}>≥{t.minElo} · {t.weight}×</span>
+                {active && <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: t.color }}>← {jr}</span>}
+              </div>
+            );
+          })}
+          {nextTier && (
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(255,255,255,0.22)' }}>to {nextTier.label}</span>
+                <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: nextTier.color }}>{eloToNext} JR needed</span>
+              </div>
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
+                <div style={{ width: `${Math.round(((jr - (tier.minElo || 0)) / (nextTier.minElo - (tier.minElo || 0))) * 100)}%`, height: '100%', background: nextTier.color, borderRadius: 2, transition: 'width 0.5s', boxShadow: `0 0 6px ${nextTier.color}44` }} />
+              </div>
             </div>
-            <div style={{ fontFamily: "'Crimson Pro',serif", fontSize: 13, color: 'rgba(255,255,255,0.35)', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 18 }}>
-              Correct votes on high-gap pairs earn more JR. Wrong answers lose it. As your JR rises, matchups are drawn from a smaller, harder pool of scientifically similar planets.
-            </div>
-            <button onClick={onRetakeQuiz} style={{ width: '100%', fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 700, padding: '12px 0', borderRadius: 9, cursor: 'pointer', background: 'rgba(127,119,221,0.1)', color: '#7F77DD', border: '0.5px solid #7F77DD33', letterSpacing: '0.1em', marginBottom: 8, transition: 'all 0.18s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(127,119,221,0.2)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(127,119,221,0.1)'; }}>
-              RETAKE QUIZ
-            </button>
-          </>
-        )}
+          )}
+        </div>
 
-        <button onClick={onSignOut} style={{ width: '100%', fontFamily: "'Space Mono',monospace", fontSize: 9, padding: '10px 0', borderRadius: 8, cursor: 'pointer', background: 'transparent', color: 'rgba(255,255,255,0.22)', border: '0.5px solid rgba(255,255,255,0.08)', letterSpacing: '0.1em', marginTop: !isAdvanced ? 8 : 0 }}>
+        <div style={{ fontFamily: "'Crimson Pro',serif", fontSize: 13, color: 'rgba(255,255,255,0.35)', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 18 }}>
+          Correct votes on high-gap pairs earn more JR. Wrong answers lose it. As your JR rises, matchups are drawn from a smaller, harder pool of scientifically similar planets.
+        </div>
+
+        <button onClick={onSignOut} style={{ width: '100%', fontFamily: "'Space Mono',monospace", fontSize: 9, padding: '10px 0', borderRadius: 8, cursor: 'pointer', background: 'transparent', color: 'rgba(255,255,255,0.22)', border: '0.5px solid rgba(255,255,255,0.08)', letterSpacing: '0.1em' }}>
           sign out
         </button>
       </div>

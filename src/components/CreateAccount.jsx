@@ -169,7 +169,7 @@ export default function CreateAccount({ onComplete, onLogin, planetCount, liveDa
             {checking ? 'CHECKING…' : returning ? `CONTINUE AS ${trimmed.toUpperCase()}` : 'ENTER THE ARCHIVE →'}
           </button>
           <div style={{ marginTop: 14, fontFamily: "'Crimson Pro',serif", fontSize: 11, color: 'rgba(255,255,255,0.22)', fontStyle: 'italic', lineHeight: 1.5 }}>
-            Your votes count from the first one. Take the calibration quiz from your profile anytime to fast-track your Judgment Rating.
+            Your votes count from the first one. JR rises on correct picks, falls on wrong ones.
           </div>
         </div>
       </div>

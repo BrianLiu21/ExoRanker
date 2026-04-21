@@ -9,11 +9,10 @@ import { calcHabitability } from './utils/phi';
 import { glicko2Matchup } from './utils/glicko2';
 import { initPlanets } from './utils/elo';
 import { getStreak } from './utils/streak';
-import { getEffectiveTier, quizStartElo } from './utils/userTiers';
+import { getEffectiveTier } from './utils/userTiers';
 import StarField from './components/primitives/StarField';
 import TierBadge from './components/primitives/TierBadge';
 import CreateAccount from './components/CreateAccount';
-import Quiz from './components/Quiz';
 import VoteArena from './components/VoteArena';
 import PlanetRankings from './components/PlanetRankings';
 import UserLeaderboard from './components/UserLeaderboard';
@@ -42,7 +41,7 @@ export default function App() {
   const [recentVotedList,setRecentVotedList]=useState(()=>{
     try{const p=JSON.parse(localStorage.getItem("er_voted1")||"[]");return Array.isArray(p)?p:[];}catch{return [];}
   });
-  const [user,setUser]=useState({username:"",quizScore:0,jr:1000,totalVotes:0,weightedCorrect:0,weightedTotal:0,accuracy:0,influence:0,streak:0,bestStreak:0,voteHistory:[],tutorialDone:false});
+  const [user,setUser]=useState({username:"",jr:1000,totalVotes:0,weightedCorrect:0,weightedTotal:0,accuracy:0,influence:0,streak:0,bestStreak:0,voteHistory:[],tutorialDone:false});
   const [allUsers,setAllUsers]=useState([]);
 
   // ── Load on mount ─────────────────────────────────────────────────────────
@@ -153,7 +152,7 @@ export default function App() {
   const saveLocal = (key, val) => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} };
 
   const handleAccount = (username) => {
-    const u = { username, mode:"standard", quizScore:0, jr:1000, totalVotes:0, weightedCorrect:0, weightedTotal:0, accuracy:0, influence:0, streak:0, bestStreak:0, voteHistory:[], tutorialDone:false };
+    const u = { username, jr:1000, totalVotes:0, weightedCorrect:0, weightedTotal:0, accuracy:0, influence:0, streak:0, bestStreak:0, voteHistory:[], tutorialDone:false };
     setUser(u);
     saveLocal("er_user1", u);
     sb.upsert("users", u);
@@ -163,17 +162,6 @@ export default function App() {
   const handleLogin = (existingUser) => {
     setUser(existingUser);
     saveLocal("er_user1", existingUser);
-    setStage("app");
-  };
-
-  const handleQuizDone = async (score) => {
-    const u = { ...user, quizScore: score, jr: quizStartElo(score) };
-    setUser(u);
-    saveLocal("er_user1", u);
-    await sb.upsert("users", u);
-    const next = allUsers.filter(x => x.username !== u.username).concat(u);
-    setAllUsers(next);
-    saveLocal("er_allusers1", next);
     setStage("app");
   };
 
@@ -278,7 +266,7 @@ export default function App() {
       localStorage.removeItem("er_user1");
       localStorage.removeItem("er_voted1");
     } catch {}
-    setUser({username:"",quizScore:0,jr:1000,totalVotes:0,weightedCorrect:0,weightedTotal:0,accuracy:0,influence:0,streak:0,bestStreak:0,voteHistory:[],tutorialDone:false});
+    setUser({username:"",jr:1000,totalVotes:0,weightedCorrect:0,weightedTotal:0,accuracy:0,influence:0,streak:0,bestStreak:0,voteHistory:[],tutorialDone:false});
     setVotedIds(new Set());
     setView("vote");
     setDetail(null);
@@ -309,7 +297,7 @@ export default function App() {
     );
     const userInfo = stage==="app"
       ?<div style={{display:"flex",alignItems:"center",gap:8}}>
-          <TierBadge tier={getEffectiveTier(user.jr||1000, user.mode)} sm/>
+          <TierBadge tier={getEffectiveTier(user.jr||1000)} sm/>
           <span style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.45)"}}>{user.totalVotes}v</span>
           {onSignOut && <button className="signout-btn" onClick={onSignOut} style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.45)",background:"transparent",border:"0.5px solid rgba(255,255,255,0.15)",borderRadius:5,padding:"3px 8px",cursor:"pointer",letterSpacing:"0.08em"}}>sign out</button>}
         </div>
@@ -365,16 +353,6 @@ export default function App() {
     </div></>
   );
 
-  if (stage === "quiz") return (
-    <><style>{CSS}</style>
-    <div style={{minHeight:"100vh",background:"#020a12",color:"white",position:"relative"}}>
-      <StarField/><Header showNav={false}/>
-      <div style={{padding:"48px 24px 80px",position:"relative",zIndex:1}}>
-        <Quiz username={user.username} onComplete={handleQuizDone}/>
-      </div>
-    </div></>
-  );
-
   return (
     <><style>{CSS}</style>
     <div style={{minHeight:"100vh",background:"#020a12",color:"white",position:"relative"}}>
@@ -393,7 +371,7 @@ export default function App() {
             </div>
             <div style={{fontFamily:"'Space Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.38)"}}>
               <span style={{color:"rgba(255,255,255,0.25)"}}>JR · </span>
-              <span style={{color:getEffectiveTier(user.jr||1000,user.mode).color}}>
+              <span style={{color:getEffectiveTier(user.jr||1000).color}}>
                 {user.jr||1000}
               </span>
             </div>
@@ -452,8 +430,8 @@ export default function App() {
         })()}
         {view==="map"     && <ExoMap planets={planets} votedIds={votedIds} onViewDetail={goDetail}/>}
         {view==="users"   && <UserLeaderboard allUsers={allUsers} currentUser={user} lastSync={lastSync}/>}
-        {view==="profile" && <MyProfile user={user} onCalibrate={()=>setStage("quiz")} onSignOut={signOut}/>}
-        {view==="detail"  && detail && <PlanetDetail planet={detail} onBack={goBack} voted={votedIds.has(detail.id)} userMode={user.mode}/>}
+        {view==="profile" && <MyProfile user={user} onSignOut={signOut}/>}
+        {view==="detail"  && detail && <PlanetDetail planet={detail} onBack={goBack} voted={votedIds.has(detail.id)}/>}
       </div>
 
       <div style={{borderTop:"0.5px solid rgba(255,255,255,0.08)",padding:"16px 24px",textAlign:"center",fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.35)",letterSpacing:"0.1em"}}>

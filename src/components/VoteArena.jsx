@@ -129,7 +129,7 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
             <TierBadge tier={tier} sm />
             <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.38)' }}>±{Math.round(tier.k * streakInfo.mult)} JR · {tier.weight}× weight</span>
           </div>
-          {streak >= 3 && user.mode === 'advanced' && (
+          {streak >= 3 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: `${streakInfo.color}15`, border: `0.5px solid ${streakInfo.color}44`, borderRadius: 20, padding: '3px 12px', animation: 'rare-pulse 1.5s ease-in-out infinite' }}>
               <div style={{ width: 4, height: 4, borderRadius: '50%', background: streakInfo.color, boxShadow: `0 0 6px ${streakInfo.color}` }} />
               <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 700, color: streakInfo.color, letterSpacing: '0.1em' }}>{streakInfo.label}</span>
