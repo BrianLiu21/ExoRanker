@@ -16,14 +16,15 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
 
   const todayKey = new Date().toISOString().slice(0, 10);
   const [potdDismissed, setPotdDismissed] = useState(false);
+  const potdKey = `er_potd_voted_${user.username}`;
   const [potdPrioritized, setPotdPrioritized] = useState(() => {
-    try { return localStorage.getItem('er_potd_voted') === todayKey; } catch { return false; }
+    try { return localStorage.getItem(`er_potd_voted_${user.username}`) === todayKey; } catch { return false; }
   });
   const dismissPotd = () => setPotdDismissed(true);
   const handlePrioritize = (planetId) => {
     if (potdPrioritized) return;
     setPotdPrioritized(true);
-    try { localStorage.setItem('er_potd_voted', todayKey); } catch {}
+    try { localStorage.setItem(potdKey, todayKey); } catch {}
     onPrioritize?.(planetId);
     setTimeout(() => setPotdDismissed(true), 800);
   };
