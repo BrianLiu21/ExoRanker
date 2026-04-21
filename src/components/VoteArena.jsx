@@ -16,14 +16,14 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
 
   const todayKey = new Date().toISOString().slice(0, 10);
   const [potdDismissed, setPotdDismissed] = useState(() => {
-    try { return localStorage.getItem('er_potd_date') === todayKey; } catch { return false; }
+    try { return localStorage.getItem('er_potd_dismissed') === todayKey; } catch { return false; }
   });
   const [potdPrioritized, setPotdPrioritized] = useState(() => {
     try { return localStorage.getItem('er_potd_voted') === todayKey; } catch { return false; }
   });
   const dismissPotd = () => {
     setPotdDismissed(true);
-    try { localStorage.setItem('er_potd_date', todayKey); } catch {}
+    try { localStorage.setItem('er_potd_dismissed', todayKey); } catch {}
   };
   const handlePrioritize = (planetId) => {
     if (potdPrioritized) return;
@@ -44,11 +44,11 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
   const queueRef = useRef([]);
   const planetsRef = useRef(planets);
   useEffect(() => { planetsRef.current = planets; }, [planets]);
-  const tier = getEffectiveTier(user.jr || 1000, user.mode);
+  const tier = getEffectiveTier(user.jr || 1000);
 
   const pickPair = useCallback(ps => {
     if (queueRef.current.length < 2) {
-      queueRef.current = buildWeightedQueue(ps, user.jr || 1000, user.mode);
+      queueRef.current = buildWeightedQueue(ps, user.jr || 1000);
     }
     const idA = queueRef.current.shift();
     const idxB = queueRef.current.findIndex(id => id !== idA);
@@ -57,14 +57,14 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
     if (pa && pb) {
       setPair([pa, pb]); setVoted(null); setEloShift(null);
     } else {
-      queueRef.current = buildWeightedQueue(ps, user.jr || 1000, user.mode);
+      queueRef.current = buildWeightedQueue(ps, user.jr || 1000);
       const a2 = queueRef.current.shift();
       const i2 = queueRef.current.findIndex(id => id !== a2);
       const b2 = i2 >= 0 ? queueRef.current.splice(i2, 1)[0] : queueRef.current.shift();
       const pa2 = ps.find(x => x.id === a2), pb2 = ps.find(x => x.id === b2);
       if (pa2 && pb2) { setPair([pa2, pb2]); setVoted(null); setEloShift(null); }
     }
-  }, [user.jr, user.mode]);
+  }, [user.jr]);
 
   useEffect(() => { if (planets.length >= 2) pickPair(planets); }, []);
 

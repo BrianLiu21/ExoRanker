@@ -20,15 +20,11 @@ export function getPlanetOfDay(planets) {
 // Advanced Observer  (JR 1150–1299): top 70%
 // Advanced Analyst   (JR 1300–1499): top 55%
 // Advanced Astronomer(JR 1500+):     top 40% - only high-PHI candidates
-export function buildWeightedQueue(planets, jr, mode) {
+export function buildWeightedQueue(planets, jr) {
   const sorted = [...planets].sort((a,b) => calcHabitability(b) - calcHabitability(a));
-  if (mode !== "advanced") return [...sorted].sort(()=>Math.random()-0.5).map(p=>p.id);
-
-  // Map JR 800→1600+ to fraction 0.9→0.4 linearly, clamped
   const minJR = 700, maxJR = 1500;
   const t = Math.min(1, Math.max(0, (jr - minJR) / (maxJR - minJR)));
-  const fraction = 0.9 - t * 0.5; // 0.9 at JR 800, 0.4 at JR 1600
+  const fraction = 0.9 - t * 0.5;
   const poolSize = Math.max(8, Math.round(sorted.length * fraction));
-  const pool = sorted.slice(0, poolSize);
-  return [...pool].sort(()=>Math.random()-0.5).map(p=>p.id);
+  return [...sorted.slice(0, poolSize)].sort(() => Math.random() - 0.5).map(p => p.id);
 }
