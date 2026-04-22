@@ -15,18 +15,27 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
   const [eloShift, setEloShift] = useState(null);
 
   const todayKey = new Date().toISOString().slice(0, 10);
-  const [potdDismissed, setPotdDismissed] = useState(false);
+  const potdDismissedKey = `er_potd_dismissed_${user.username}_${todayKey}`;
+  const [potdDismissed, setPotdDismissed] = useState(() => {
+    try { return sessionStorage.getItem(potdDismissedKey) === '1'; } catch { return false; }
+  });
   const potdKey = `er_potd_voted_${user.username}`;
   const [potdPrioritized, setPotdPrioritized] = useState(() => {
     try { return localStorage.getItem(`er_potd_voted_${user.username}`) === todayKey; } catch { return false; }
   });
-  const dismissPotd = () => setPotdDismissed(true);
+  const dismissPotd = () => {
+    try { sessionStorage.setItem(potdDismissedKey, '1'); } catch {}
+    setPotdDismissed(true);
+  };
   const handlePrioritize = (planetId) => {
     if (potdPrioritized) return;
     setPotdPrioritized(true);
     try { localStorage.setItem(potdKey, todayKey); } catch {}
     onPrioritize?.(planetId);
-    setTimeout(() => setPotdDismissed(true), 800);
+    setTimeout(() => {
+      try { sessionStorage.setItem(potdDismissedKey, '1'); } catch {}
+      setPotdDismissed(true);
+    }, 800);
   };
 
   const [showTutorial, setShowTutorial] = useState(!user.tutorialDone && (user.totalVotes || 0) < 3);
