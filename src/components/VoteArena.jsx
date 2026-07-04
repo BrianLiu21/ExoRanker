@@ -7,7 +7,7 @@ import { useIsMobile } from '../utils/useIsMobile';
 import PlanetCard from './PlanetCard';
 import TierBadge from './primitives/TierBadge';
 
-export default function VoteArena({ planets, user, onVote, onViewDetail, onNextPair, votedIds, onPrioritize }) {
+export default function VoteArena({ planets, user, allUsers, onVote, onViewDetail, onNextPair, votedIds, onPrioritize }) {
   const isMobile = useIsMobile();
   const [pair, setPair] = useState(null);
   const [voted, setVoted] = useState(null);
@@ -107,6 +107,15 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
   const pct = Math.round(votedCount / planets.length * 100);
   const potd = getPlanetOfDay(planets);
 
+  // Community totals from the shared users table (exact vote counts, one per pair vote).
+  // Before the first Supabase sync allUsers can be empty — never show less than your own count.
+  const communityVotes = Math.max(
+    (allUsers || []).reduce((s, u) => s + (u.totalVotes || 0), 0),
+    user.totalVotes || 0
+  );
+  const voterCount = Math.max((allUsers || []).length, 1);
+  const yourShare = communityVotes > 0 ? Math.round((user.totalVotes || 0) / communityVotes * 100) : 0;
+
   return (
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
 
@@ -185,6 +194,24 @@ export default function VoteArena({ planets, user, onVote, onViewDetail, onNextP
             </div>
           )}
         </div>
+      </div>
+
+      {/* Community pulse */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: isMobile ? 18 : 34, flexWrap: 'wrap',
+        background: 'rgba(5,12,20,0.6)', border: '0.5px solid rgba(255,255,255,0.07)',
+        borderRadius: 10, padding: '10px 18px', maxWidth: 860, margin: '0 auto 20px',
+      }}>
+        {[
+          ['COMMUNITY VOTES', communityVotes.toLocaleString(), '#1D9E75'],
+          ['VOTERS', voterCount.toLocaleString(), '#378ADD'],
+          ['YOUR SHARE', `${yourShare}%`, '#EF9F27'],
+        ].map(([label, value, color]) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.16em' }}>{label}</span>
+            <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 700, color }}>{value}</span>
+          </div>
+        ))}
       </div>
 
       {/* Tutorial */}

@@ -36,8 +36,9 @@ export function assignHue(type, temp) {
   return "purple";
 }
 
-export function autoTags(radius, temp, dist, method, year) {
+export function autoTags(radius, temp, dist, method, year, added) {
   const t = [];
+  if (added && isRecentlyAdded(added)) t.push("newly added");
   if (dist && dist < 50) t.push("nearby");
   if (temp > 180 && temp < 380 && radius < 2.5) t.push("HZ candidate");
   if (temp > 2000) t.push("extreme temp");
@@ -45,6 +46,32 @@ export function autoTags(radius, temp, dist, method, year) {
   if (year >= 2022) t.push("recent discovery");
   if (t.length < 2) t.push(radius < 1.5 ? "rocky" : "gas-dominated");
   return t.slice(0, 3);
+}
+
+// ─── ARCHIVE RECENCY ──────────────────────────────────────────────────────────
+// "added" = releasedate: the date the row entered the NASA Exoplanet Archive.
+
+export function isRecentlyAdded(added, windowDays = 180) {
+  const t = added ? Date.parse(added) : NaN;
+  if (Number.isNaN(t)) return false;
+  return Date.now() - t < windowDays * 86400000;
+}
+
+// Sortable timestamp for archive recency: releasedate → disc_pubdate → disc_year
+export function addedTime(p) {
+  for (const d of [p.added, p.pub]) {
+    const t = d ? Date.parse(d) : NaN;
+    if (!Number.isNaN(t)) return t;
+  }
+  const y = parseInt(p.year, 10);
+  return Number.isNaN(y) ? 0 : Date.UTC(y, 0, 1);
+}
+
+export function fmtAdded(added) {
+  const t = added ? Date.parse(added) : NaN;
+  if (Number.isNaN(t)) return null;
+  // Date-only strings parse as UTC midnight — format in UTC to avoid an off-by-one day
+  return new Date(t).toLocaleDateString("en-US", { year: "numeric", month: "short", day: added.length > 7 ? "numeric" : undefined, timeZone: "UTC" });
 }
 
 // Fallback: infer star type from hostname patterns when spectype not available
@@ -78,6 +105,8 @@ export function enrichNASARow(r) {
   const stAge  = r.st_age != null ? parseFloat((+r.st_age).toFixed(1)) : null;
   const ra  = r.ra  != null ? +r.ra  : null;
   const dec = r.dec != null ? +r.dec : null;
+  const added = r.releasedate || null;
+  const pub   = r.disc_pubdate || null;
   return {
     id:     (r.pl_name || "").toLowerCase().replace(/[^a-z0-9]/g, "-"),
     name:   r.pl_name || "Unknown",
@@ -90,7 +119,9 @@ export function enrichNASARow(r) {
     esi,    st, stAge,
     year:   r.disc_year || "?",
     scope:  r.disc_facility || r.discoverymethod || "Unknown",
-    tags:   autoTags(radius, temp, dist, r.discoverymethod, r.disc_year),
+    method: r.discoverymethod || null,
+    added,  pub,
+    tags:   autoTags(radius, temp, dist, r.discoverymethod, r.disc_year, added),
     hue:    assignHue(type, temp),
   };
 }

@@ -3,6 +3,7 @@ import { useIsMobile } from '../utils/useIsMobile';
 import { HC } from '../constants/colors';
 import { habitabilityComponents, HAB_LABEL, HAB_COLOR } from '../utils/phi';
 import { rdLabel, rdColor } from '../utils/glicko2';
+import { isRecentlyAdded, fmtAdded } from '../utils/nasa';
 import Planet3D from './Planet3D';
 import ScoreBar from './primitives/ScoreBar';
 
@@ -37,8 +38,15 @@ export default function PlanetDetail({ planet, onBack, voted }) {
 
         {/* Name block */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: `${c.accent}88`, letterSpacing: '0.22em', marginBottom: 6, textTransform: 'uppercase' }}>
-            {planet.scope} · {planet.year}
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center', marginBottom: 6 }}>
+            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: `${c.accent}88`, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
+              {planet.scope} · {planet.year}
+            </div>
+            {isRecentlyAdded(planet.added) && (
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, color: '#1D9E75', background: '#1D9E7518', border: '0.5px solid #1D9E7544', borderRadius: 3, padding: '1px 6px', letterSpacing: '0.1em' }}>
+                NEWLY ADDED
+              </div>
+            )}
           </div>
           <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: '#e8f4ff', letterSpacing: '0.04em', marginBottom: 4 }}>{planet.name}</div>
           <div style={{ fontFamily: "'Crimson Pro',serif", fontSize: 15, color: 'rgba(255,255,255,0.42)', fontStyle: 'italic', marginBottom: planet.tags?.length ? 14 : 0 }}>
@@ -63,7 +71,11 @@ export default function PlanetDetail({ planet, onBack, voted }) {
             ['Eq. Temp', `${planet.temp} K`],
             ['Period', planet.period < 1 ? `${(planet.period * 24).toFixed(1)}h` : `${planet.period}d`],
             ['Distance', planet.dist < 1000 ? `${planet.dist} ly` : `${(planet.dist / 1000).toFixed(1)}k ly`],
-            ['Host star', planet.host],
+            ['ESI', `${Math.round((planet.esi || 0) * 100)}%`],
+            ['Host star', planet.st ? `${planet.host} (${planet.st})` : planet.host],
+            ['Method', planet.method || planet.scope],
+            ['Discovered', planet.year],
+            ['Added to archive', fmtAdded(planet.added) || '—'],
             ['Community rating', planet.r || 1500],
             ['Confidence', rdLabel(planet.rd || 350)],
           ].map(([k, v]) => (

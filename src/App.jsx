@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useIsMobile } from './utils/useIsMobile';
 import { FONTS } from './constants/fonts';
 import { HC } from './constants/colors';
@@ -21,6 +21,74 @@ import MyProfile from './components/MyProfile';
 import ExoMap from './components/ExoMap';
 import AccuracyToast from './components/AccuracyToast';
 import TierUpgradeToast from './components/TierUpgradeToast';
+
+// ─── HEADER ───────────────────────────────────────────────────────────────────
+// Module-level so React preserves it across App re-renders (defining it inside
+// App changed its identity every render, remounting the nav on every state change).
+function Header({ showNav = true, onSignOut = null, stage, user, view, setView, setDetail, planetCount }) {
+  const mob = useIsMobile();
+  const DESKTOP_NAV = [["vote","VOTE"],["planets","PLANETS"],["voted","VOTED"],["map","EXOMAP"],["users","LEADERBOARD"],["profile","MY PROFILE"]];
+  const MOBILE_NAV  = [["vote","VOTE"],["planets","PLANETS"],["voted","VOTED"],["map","MAP"],["users","BOARD"],["profile","PROFILE"]];
+  const SVG_LOGO = (
+    <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style={{flexShrink:0}}>
+      <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" opacity="0.45"/>
+      <circle cx="15" cy="15" r="7" fill="#1D9E75" opacity="0.18"/>
+      <circle cx="15" cy="15" r="5.5" fill="#0d3d30"/>
+      <circle cx="15" cy="15" r="5.5" fill="url(#pg)" opacity="0.9"/>
+      <circle cx="13" cy="13" r="1.8" fill="#1D9E75" opacity="0.25"/>
+      <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" strokeDasharray="9 33" opacity="0.85"/>
+      <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff"/>
+      <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff" opacity="0.4" style={{filter:"blur(1px)"}}/>
+      <defs><radialGradient id="pg" cx="35%" cy="35%" r="65%"><stop offset="0%" stopColor="#2dd4a0"/><stop offset="100%" stopColor="#0a2820"/></radialGradient></defs>
+    </svg>
+  );
+  const userInfo = stage==="app"
+    ?<div style={{display:"flex",alignItems:"center",gap:8}}>
+        <TierBadge tier={getEffectiveTier(user.jr||1000)} sm/>
+        <span style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.45)"}}>{user.totalVotes}v</span>
+        {onSignOut && <button className="signout-btn" onClick={onSignOut} style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.45)",background:"transparent",border:"0.5px solid rgba(255,255,255,0.15)",borderRadius:5,padding:"3px 8px",cursor:"pointer",letterSpacing:"0.08em"}}>sign out</button>}
+      </div>
+    :<div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.5)"}}>{planetCount} planets</div>;
+
+  if (mob) return (
+    <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,10,18,0.93)",backdropFilter:"blur(10px)",borderBottom:"0.5px solid rgba(255,255,255,0.06)",padding:"0 16px"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:46}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          {SVG_LOGO}
+          <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:"#e8f4ff",letterSpacing:"0.12em",marginRight:"-0.12em"}}>EXO</span><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:400,color:"#1D9E75",letterSpacing:"0.12em"}}>RANKER</span>
+          {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4}}/>}
+        </div>
+        {userInfo}
+      </div>
+      {showNav && (
+        <div style={{display:"flex",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:6}}>
+          {MOBILE_NAV.map(([v,l])=>(
+            <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:11,letterSpacing:"0.1em",padding:"7px 10px",borderRadius:6,cursor:"pointer",flexShrink:0,background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.52)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  // ── Desktop ──
+  return (
+    <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,9,17,0.96)",backdropFilter:"blur(14px)",borderBottom:"0.5px solid rgba(255,255,255,0.07)",padding:"0 24px"}}>
+      {/* Gradient accent line at very top */}
+      <div style={{position:"absolute",top:0,left:0,right:0,height:1,background:"linear-gradient(90deg, transparent 0%, #1D9E7544 30%, #378ADD33 60%, transparent 100%)",pointerEvents:"none"}}/>
+      <div style={{maxWidth:960,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          {SVG_LOGO}
+          <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:"#e8f4ff",letterSpacing:"0.12em",marginRight:"-0.12em"}}>EXO</span><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:400,color:"#1D9E75",letterSpacing:"0.12em"}}>RANKER</span>
+          {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4,animation:"orb-pulse 2.5s ease-in-out infinite"}} title="Shared backend connected"/>}
+        </div>
+        {showNav&&<div style={{display:"flex",gap:2}}>{DESKTOP_NAV.map(([v,l])=>(
+          <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:10,letterSpacing:"0.1em",padding:"7px 13px",borderRadius:7,cursor:"pointer",background:(view===v&&view!=="detail")?"rgba(29,158,117,0.13)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.48)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
+        ))}</div>}
+        {userInfo}
+      </div>
+    </div>
+  );
+}
 
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
 export default function App() {
@@ -83,7 +151,7 @@ export default function App() {
       // 1b. Try NASA Exoplanet Archive directly (works in local dev)
       if (!rawPlanets) {
         try {
-          const cols = "pl_name,hostname,pl_rade,pl_bmasse,pl_orbper,pl_eqt,sy_dist,ra,dec,st_spectype,st_age,disc_year,disc_facility,discoverymethod";
+          const cols = "pl_name,hostname,pl_rade,pl_bmasse,pl_orbper,pl_eqt,sy_dist,ra,dec,st_spectype,st_age,disc_year,disc_facility,discoverymethod,disc_pubdate,releasedate";
           const q = `SELECT ${cols} FROM ps WHERE default_flag=1 AND pl_rade IS NOT NULL AND pl_eqt IS NOT NULL AND pl_orbper IS NOT NULL`;
           const url = `https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=${encodeURIComponent(q)}&format=json&maxrec=2000`;
           const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
@@ -298,80 +366,19 @@ export default function App() {
     setStage("account");
   };
 
-  const sorted = [...planets].sort((a, b) => (b.r||1500) - (a.r||1500));
-  const topPlanet = sorted[0];
+  const topPlanet = useMemo(
+    () => planets.reduce((top, p) => ((p.r||1500) > (top?.r||1500) ? p : top), planets[0]),
+    [planets]
+  );
 
   const CSS = `${FONTS}*{box-sizing:border-box;margin:0;padding:0}body{background:#020a12}@keyframes orb-pulse{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}@keyframes shimmer{0%,100%{opacity:.35}50%{opacity:.7}}@keyframes rare-pulse{0%,100%{opacity:.7}50%{opacity:1}}@keyframes rainbow-shift{0%{filter:hue-rotate(0deg) brightness(1.4)}100%{filter:hue-rotate(360deg) brightness(1.4)}}@keyframes rainbow-radiate{0%,100%{text-shadow:0 0 10px #ff0080,0 0 30px #ff008088,0 0 60px #ff008044,0 0 120px #ff008022}25%{text-shadow:0 0 10px #00ffcc,0 0 30px #00ffcc88,0 0 60px #00ffcc44,0 0 120px #00ffcc22}50%{text-shadow:0 0 10px #0080ff,0 0 30px #0080ff88,0 0 60px #0080ff44,0 0 120px #0080ff22}75%{text-shadow:0 0 10px #ffcc00,0 0 30px #ffcc0088,0 0 60px #ffcc0044,0 0 120px #ffcc0022}}@keyframes float-up{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-52px) scale(0.8)}}@keyframes slide-in-bottom{from{opacity:0;transform:translateX(-50%) translateY(18px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes fade-in-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@keyframes nav-glow{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px #1D9E7522}}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#020a12}::-webkit-scrollbar-thumb{background:#1D9E7533;border-radius:2px}::selection{background:#1D9E7533;color:#e8f4ff}.nav-btn{transition:all 0.18s ease!important}.nav-btn:hover{transform:scale(1.09)!important;opacity:1!important}.signout-btn{transition:all 0.18s ease!important}.signout-btn:hover{transform:scale(1.08)!important;color:rgba(255,255,255,0.55)!important;border-color:rgba(255,255,255,0.28)!important}.page-content{animation:fade-in-up 0.32s ease both}`;
 
-  const Header = ({showNav=true, onSignOut=null}) => {
-    const mob = useIsMobile();
-    const DESKTOP_NAV = [["vote","VOTE"],["planets","PLANETS"],["voted","VOTED"],["map","EXOMAP"],["users","LEADERBOARD"],["profile","MY PROFILE"]];
-    const MOBILE_NAV  = [["vote","VOTE"],["planets","PLANETS"],["voted","VOTED"],["map","MAP"],["users","BOARD"],["profile","PROFILE"]];
-    const SVG_LOGO = (
-      <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" style={{flexShrink:0}}>
-        <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" opacity="0.45"/>
-        <circle cx="15" cy="15" r="7" fill="#1D9E75" opacity="0.18"/>
-        <circle cx="15" cy="15" r="5.5" fill="#0d3d30"/>
-        <circle cx="15" cy="15" r="5.5" fill="url(#pg)" opacity="0.9"/>
-        <circle cx="13" cy="13" r="1.8" fill="#1D9E75" opacity="0.25"/>
-        <ellipse cx="15" cy="15" rx="13.5" ry="5" stroke="#1D9E75" strokeWidth="1.1" strokeDasharray="9 33" opacity="0.85"/>
-        <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff"/>
-        <circle cx="28.5" cy="15" r="1.8" fill="#e8f4ff" opacity="0.4" style={{filter:"blur(1px)"}}/>
-        <defs><radialGradient id="pg" cx="35%" cy="35%" r="65%"><stop offset="0%" stopColor="#2dd4a0"/><stop offset="100%" stopColor="#0a2820"/></radialGradient></defs>
-      </svg>
-    );
-    const userInfo = stage==="app"
-      ?<div style={{display:"flex",alignItems:"center",gap:8}}>
-          <TierBadge tier={getEffectiveTier(user.jr||1000)} sm/>
-          <span style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.45)"}}>{user.totalVotes}v</span>
-          {onSignOut && <button className="signout-btn" onClick={onSignOut} style={{fontFamily:"'Space Mono',monospace",fontSize:10,color:"rgba(255,255,255,0.45)",background:"transparent",border:"0.5px solid rgba(255,255,255,0.15)",borderRadius:5,padding:"3px 8px",cursor:"pointer",letterSpacing:"0.08em"}}>sign out</button>}
-        </div>
-      :<div style={{fontFamily:"'Space Mono',monospace",fontSize:11,color:"rgba(255,255,255,0.5)"}}>{planetCount} planets</div>;
-
-    if (mob) return (
-      <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,10,18,0.93)",backdropFilter:"blur(10px)",borderBottom:"0.5px solid rgba(255,255,255,0.06)",padding:"0 16px"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",height:46}}>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            {SVG_LOGO}
-            <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:"#e8f4ff",letterSpacing:"0.12em",marginRight:"-0.12em"}}>EXO</span><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:400,color:"#1D9E75",letterSpacing:"0.12em"}}>RANKER</span>
-            {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4}}/>}
-          </div>
-          {userInfo}
-        </div>
-        {showNav && (
-          <div style={{display:"flex",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:6}}>
-            {MOBILE_NAV.map(([v,l])=>(
-              <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:11,letterSpacing:"0.1em",padding:"7px 10px",borderRadius:6,cursor:"pointer",flexShrink:0,background:(view===v&&view!=="detail")?"rgba(29,158,117,0.14)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.52)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-
-    // ── Desktop ──
-    return (
-      <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(2,9,17,0.96)",backdropFilter:"blur(14px)",borderBottom:"0.5px solid rgba(255,255,255,0.07)",padding:"0 24px"}}>
-        {/* Gradient accent line at very top */}
-        <div style={{position:"absolute",top:0,left:0,right:0,height:1,background:"linear-gradient(90deg, transparent 0%, #1D9E7544 30%, #378ADD33 60%, transparent 100%)",pointerEvents:"none"}}/>
-        <div style={{maxWidth:960,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56}}>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            {SVG_LOGO}
-            <span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:900,color:"#e8f4ff",letterSpacing:"0.12em",marginRight:"-0.12em"}}>EXO</span><span style={{fontFamily:"'Orbitron',sans-serif",fontSize:14,fontWeight:400,color:"#1D9E75",letterSpacing:"0.12em"}}>RANKER</span>
-            {SB_ON&&<div style={{width:5,height:5,borderRadius:"50%",background:"#1D9E75",boxShadow:"0 0 6px #1D9E75",marginLeft:4,animation:"orb-pulse 2.5s ease-in-out infinite"}} title="Shared backend connected"/>}
-          </div>
-          {showNav&&<div style={{display:"flex",gap:2}}>{DESKTOP_NAV.map(([v,l])=>(
-            <button key={v} className="nav-btn" onClick={()=>{setView(v);setDetail(null);}} style={{fontFamily:"'Space Mono',monospace",fontSize:10,letterSpacing:"0.1em",padding:"7px 13px",borderRadius:7,cursor:"pointer",background:(view===v&&view!=="detail")?"rgba(29,158,117,0.13)":"transparent",color:(view===v&&view!=="detail")?"#1D9E75":"rgba(255,255,255,0.48)",border:(view===v&&view!=="detail")?"0.5px solid #1D9E7544":"0.5px solid transparent"}}>{l}</button>
-          ))}</div>}
-          {userInfo}
-        </div>
-      </div>
-    );
-  };
+  const headerProps = { stage, user, view, setView, setDetail, planetCount };
 
   if (stage === "account") return (
     <><style>{CSS}</style>
     <div style={{minHeight:"100vh",background:"#020a12",color:"white",position:"relative"}}>
-      <StarField/><Header showNav={false}/>
+      <StarField/><Header showNav={false} {...headerProps}/>
       <div style={{padding:"60px 24px 80px",position:"relative",zIndex:1}}>
         <CreateAccount onComplete={handleAccount} onLogin={handleLogin} planetCount={planetCount} liveData={liveData}/>
       </div>
@@ -382,7 +389,7 @@ export default function App() {
     <><style>{CSS}</style>
     <div style={{minHeight:"100vh",background:"#020a12",color:"white",position:"relative"}}>
       <StarField/>
-      <Header onSignOut={signOut}/>
+      <Header onSignOut={signOut} {...headerProps}/>
 
       {view !== "detail" && (
         <div style={{background:"rgba(2,8,16,0.7)",borderBottom:"0.5px solid rgba(255,255,255,0.05)",padding:"6px 24px"}}>
@@ -411,7 +418,7 @@ export default function App() {
         {/* Keep VoteArena mounted when navigating to detail so the pair is preserved */}
         {(view==="vote" || (view==="detail" && prevView==="vote")) && (
           <div style={{display:view==="vote"?"block":"none"}}>
-            <VoteArena planets={planets} user={user} onVote={handleVote} onViewDetail={goDetail} onNextPair={()=>setToast(null)} votedIds={votedIds} onPrioritize={handlePrioritize}/>
+            <VoteArena planets={planets} user={user} allUsers={allUsers} onVote={handleVote} onViewDetail={goDetail} onNextPair={()=>setToast(null)} votedIds={votedIds} onPrioritize={handlePrioritize}/>
           </div>
         )}
         {view==="planets" && <PlanetRankings planets={planets} onViewDetail={goDetail} lastVotedIds={lastVotedPair}/>}

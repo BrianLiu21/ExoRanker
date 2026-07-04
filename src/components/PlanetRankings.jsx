@@ -1,11 +1,42 @@
+import { useMemo, useState } from 'react';
 import { HC } from '../constants/colors';
 import { rdColor, rdLabel } from '../utils/glicko2';
+import { addedTime } from '../utils/nasa';
 import PlanetOrb from './primitives/PlanetOrb';
 
+const SORTS = [
+  ['rating', 'RATING',     (a, b) => (b.r || 1500) - (a.r || 1500)],
+  ['esi',    'ESI',        (a, b) => (b.esi || 0) - (a.esi || 0)],
+  ['newest', 'NEWEST',     (a, b) => addedTime(b) - addedTime(a)],
+  ['nearest','NEAREST',    (a, b) => (a.dist || 9999) - (b.dist || 9999)],
+  ['votes',  'MOST VOTED', (a, b) => (b.matchups || 0) - (a.matchups || 0)],
+];
+
+const inputStyle = {
+  fontFamily: "'Space Mono',monospace", fontSize: 10, color: '#e8f4ff',
+  background: 'rgba(5,12,20,0.85)', border: '0.5px solid rgba(255,255,255,0.12)',
+  borderRadius: 7, padding: '8px 11px', outline: 'none', letterSpacing: '0.05em',
+};
+
 export default function PlanetRankings({ planets, onViewDetail, lastVotedIds }) {
-  const sorted = [...planets].sort((a, b) => (b.r || 1500) - (a.r || 1500));
+  const [query, setQuery] = useState('');
+  const [sortKey, setSortKey] = useState('rating');
+  const [typeFilter, setTypeFilter] = useState('all');
+
+  const types = useMemo(() => [...new Set(planets.map(p => p.type))].sort(), [planets]);
+  const sortFn = SORTS.find(([k]) => k === sortKey)?.[2] || SORTS[0][2];
+
+  const sorted = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return planets
+      .filter(p => typeFilter === 'all' || p.type === typeFilter)
+      .filter(p => !q || p.name.toLowerCase().includes(q) || p.host.toLowerCase().includes(q))
+      .sort(sortFn);
+  }, [planets, query, typeFilter, sortFn]);
+
   const recentIds = lastVotedIds || new Set();
   const totalMatchups = planets.reduce((s, p) => s + (p.matchups || 0), 0);
+  const showPodium = sortKey === 'rating' && !query.trim() && typeFilter === 'all';
 
   const MEDAL = ['#FFD700', '#C0C0C0', '#CD7F32'];
 
@@ -19,7 +50,7 @@ export default function PlanetRankings({ planets, onViewDetail, lastVotedIds }) 
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
           <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 24, fontWeight: 700, color: '#e8f4ff' }}>Planet Priority Index</div>
           <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>
-            {planets.length} planets · {totalMatchups.toLocaleString()} votes
+            {planets.length} planets · {totalMatchups.toLocaleString()} matchups
           </div>
         </div>
         <div style={{ fontFamily: "'Crimson Pro',serif", fontSize: 14, color: 'rgba(255,255,255,0.45)', fontStyle: 'italic', marginTop: 5 }}>
@@ -27,8 +58,32 @@ export default function PlanetRankings({ planets, onViewDetail, lastVotedIds }) 
         </div>
       </div>
 
+      {/* Search / filter / sort controls */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+        <input
+          value={query} onChange={e => setQuery(e.target.value)}
+          placeholder="search name or host star…"
+          style={{ ...inputStyle, flex: 1, minWidth: 160 }}
+          onFocus={e => { e.currentTarget.style.borderColor = '#1D9E7566'; }}
+          onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+        />
+        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+          <option value="all">ALL TYPES</option>
+          {types.map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+        </select>
+        <select value={sortKey} onChange={e => setSortKey(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+          {SORTS.map(([k, label]) => <option key={k} value={k}>SORT · {label}</option>)}
+        </select>
+      </div>
+
+      {sorted.length === 0 && (
+        <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 11, color: 'rgba(255,255,255,0.25)', textAlign: 'center', padding: '60px 0' }}>
+          No planets match "{query}".
+        </div>
+      )}
+
       {/* Top 3 podium */}
-      {sorted.length >= 3 && (
+      {showPodium && sorted.length >= 3 && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
           {sorted.slice(0, 3).map((p, i) => {
             const c = HC[p.hue] || HC.blue;
@@ -60,8 +115,8 @@ export default function PlanetRankings({ planets, onViewDetail, lastVotedIds }) 
       )}
 
       {/* Rest of list */}
-      {sorted.slice(sorted.length >= 3 ? 3 : 0).map((p, i) => {
-        const rank = (sorted.length >= 3 ? 3 : 0) + i;
+      {sorted.slice(showPodium && sorted.length >= 3 ? 3 : 0).map((p, i) => {
+        const rank = (showPodium && sorted.length >= 3 ? 3 : 0) + i;
         const c = HC[p.hue] || HC.blue;
         const isRecent = recentIds.has(p.id);
         const conf = Math.round((1 - Math.min(350, p.rd || 350) / 350) * 100);

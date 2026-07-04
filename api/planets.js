@@ -19,6 +19,8 @@ const COLUMNS = [
   "disc_year",
   "disc_facility",
   "discoverymethod",
+  "disc_pubdate",
+  "releasedate",
 ].join(",");
 
 // Return up to 2000 confirmed planets that have the key columns filled in

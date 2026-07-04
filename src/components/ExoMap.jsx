@@ -32,19 +32,22 @@ function idSeed(id) {
   return h;
 }
 
-// Convert RA (degrees), Dec (degrees), dist (light-years) → (x, y, z)
-// Standard astronomical convention: x toward RA=0/Dec=0, z toward north pole
-function raDecDistToXYZ(ra, dec, dist) {
+// Convert RA/Dec (degrees) to a unit direction vector.
+// Celestial north pole along +Y (the renderer's up axis); RA sweeps the XZ plane.
+function raDecDir(ra, dec) {
   const raRad  = ra  * Math.PI / 180;
   const decRad = dec * Math.PI / 180;
   return [
-     dist * Math.cos(decRad) * Math.cos(raRad),
-     dist * Math.sin(decRad),
-     dist * Math.cos(decRad) * Math.sin(raRad),
+    Math.cos(decRad) * Math.cos(raRad),
+    Math.sin(decRad),
+    Math.cos(decRad) * Math.sin(raRad),
   ];
 }
 
-const SCALE = 0.06; // ly → scene units
+// Log-compressed radial layout: the dataset spans 4 ly (Proxima) to ~25,000 ly
+// (microlensing bulge). A linear scale collapses every nearby planet into the
+// origin, so radius grows with log distance — the labeled rings keep it honest.
+const distToSceneR = (ly) => 40 * Math.log10(1 + ly / 10);
 
 // Estimate distance (ly) from discovery facility/method when sy_dist is unavailable
 function estimateDist(scope, rng) {
@@ -84,18 +87,18 @@ function planetXYZ(planet) {
   const rng = seededRng(idSeed(planet.id));
   const hasRealDist = planet.dist < 9000;
   const dist = hasRealDist ? planet.dist : estimateDist(planet.scope, rng);
+  const r = distToSceneR(dist);
 
   if (planet.ra != null && planet.dec != null) {
-    const [x, y, z] = raDecDistToXYZ(planet.ra, planet.dec, dist);
-    return [x * SCALE, y * SCALE, z * SCALE];
+    const [x, y, z] = raDecDir(planet.ra, planet.dec);
+    return [x * r, y * r, z * r];
   }
 
-  // No RA/Dec at all (rare) — pure random shell
+  // No RA/Dec at all (rare) — random direction on the sphere
   const theta = rng() * Math.PI * 2;
   const cosP  = 2 * rng() - 1;
   const sinP  = Math.sqrt(1 - cosP * cosP);
-  const r     = dist * SCALE;
-  return [r * sinP * Math.cos(theta), r * cosP * 0.3, r * sinP * Math.sin(theta)];
+  return [r * sinP * Math.cos(theta), r * cosP, r * sinP * Math.sin(theta)];
 }
 
 export default function ExoMap({ planets, votedIds, onViewDetail }) {
@@ -233,12 +236,76 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
     const bgMat = new THREE.PointsMaterial({ color: 0x3a4d60, size: 0.45, sizeAttenuation: true });
     scene.add(new THREE.Points(bgGeo, bgMat));
 
-    // ─ Galactic plane grid (subtle) ─
-    const gridHelper = new THREE.GridHelper(300, 30, 0x0d2a22, 0x0a1e18);
-    gridHelper.material.opacity = 0.18;
-    gridHelper.material.transparent = true;
-    scene.add(gridHelper);
+    const disposables = [];
 
+    // ─ Label sprite factory (canvas → texture) ─
+    const makeLabel = (text, color = 'rgba(159,225,203,0.75)') => {
+      const cv = document.createElement('canvas');
+      cv.width = 256; cv.height = 64;
+      const ctx = cv.getContext('2d');
+      ctx.font = '26px "Space Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = color;
+      ctx.fillText(text, 128, 32);
+      const tex = new THREE.CanvasTexture(cv);
+      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, opacity: 0.9 });
+      const sp = new THREE.Sprite(mat);
+      sp.scale.set(15, 3.75, 1);
+      disposables.push(tex, mat);
+      return sp;
+    };
+
+    // ─ Sun at the origin (this is a heliocentric map) ─
+    const sunCv = document.createElement('canvas');
+    sunCv.width = sunCv.height = 128;
+    const sctx = sunCv.getContext('2d');
+    const sgrad = sctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    sgrad.addColorStop(0,    'rgba(255,246,220,1)');
+    sgrad.addColorStop(0.22, 'rgba(255,215,130,0.9)');
+    sgrad.addColorStop(0.55, 'rgba(239,159,39,0.22)');
+    sgrad.addColorStop(1,    'rgba(239,159,39,0)');
+    sctx.fillStyle = sgrad;
+    sctx.fillRect(0, 0, 128, 128);
+    const sunTex = new THREE.CanvasTexture(sunCv);
+    const sunMat = new THREE.SpriteMaterial({ map: sunTex, transparent: true, depthTest: false, blending: THREE.AdditiveBlending });
+    const sun = new THREE.Sprite(sunMat);
+    sun.scale.set(8, 8, 1);
+    scene.add(sun);
+    disposables.push(sunTex, sunMat);
+    const sunLabel = makeLabel('SUN', 'rgba(250,199,117,0.85)');
+    sunLabel.position.set(0, -4.5, 0);
+    scene.add(sunLabel);
+
+    // ─ Distance rings in the celestial-equator plane (log scale) ─
+    const ringGroup = new THREE.Group();
+    const ringMat = new THREE.LineBasicMaterial({ color: 0x1d9e75, transparent: true, opacity: 0.15 });
+    disposables.push(ringMat);
+    for (const [ly, label] of [[10, '10 LY'], [100, '100 LY'], [1000, '1,000 LY'], [10000, '10,000 LY']]) {
+      const r = distToSceneR(ly);
+      const pts = [];
+      for (let i = 0; i <= 128; i++) {
+        const a = (i / 128) * Math.PI * 2;
+        pts.push(new THREE.Vector3(r * Math.cos(a), 0, r * Math.sin(a)));
+      }
+      const g = new THREE.BufferGeometry().setFromPoints(pts);
+      ringGroup.add(new THREE.Line(g, ringMat));
+      disposables.push(g);
+      const lb = makeLabel(label);
+      lb.position.set(r, 2.4, 0);
+      ringGroup.add(lb);
+    }
+    scene.add(ringGroup);
+
+    // ─ Hover highlight (bright point overlaid on the hovered planet) ─
+    const hlGeo = new THREE.BufferGeometry();
+    hlGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0], 3));
+    hlGeo.setAttribute('aColor',   new THREE.Float32BufferAttribute([0.9, 1, 0.95], 3));
+    hlGeo.setAttribute('aSize',    new THREE.Float32BufferAttribute([13], 1));
+    const hlPoints = new THREE.Points(hlGeo, planetMat);
+    hlPoints.visible = false;
+    scene.add(hlPoints);
+    disposables.push(hlGeo);
 
     // ─ Raycaster ─
     const raycaster = new THREE.Raycaster();
@@ -248,6 +315,7 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
     // ─ Mouse / touch state ─
     let dragging = false;
     let lastX = 0, lastY = 0;
+    let velTheta = 0, velPhi = 0; // drag inertia
     let hoveredIdx = -1;
     let clickTarget = null;
     let touchMoved = false;
@@ -267,8 +335,12 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
       const my = e.clientY - rect.top;
 
       if (dragging) {
-        camTheta -= (e.clientX - lastX) * 0.005;
-        camPhi = Math.max(0.12, Math.min(Math.PI - 0.12, camPhi - (e.clientY - lastY) * 0.005));
+        const dTheta = -(e.clientX - lastX) * 0.005;
+        const dPhi   = -(e.clientY - lastY) * 0.005;
+        camTheta += dTheta;
+        camPhi = Math.max(0.12, Math.min(Math.PI - 0.12, camPhi + dPhi));
+        velTheta = dTheta;
+        velPhi   = dPhi;
         updateCam();
         lastX = e.clientX;
         lastY = e.clientY;
@@ -286,17 +358,22 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
         const idx = hits[0].index;
         hoveredIdx  = idx;
         clickTarget = validPlanets[idx];
+        hlPoints.position.set(posArr[idx * 3], posArr[idx * 3 + 1], posArr[idx * 3 + 2]);
+        hlPoints.visible = true;
+        renderer.domElement.style.cursor = 'pointer';
         setInfo({ planet: validPlanets[idx], x: mx, y: my });
       } else {
         hoveredIdx  = -1;
         clickTarget = null;
+        hlPoints.visible = false;
+        renderer.domElement.style.cursor = 'grab';
         setInfo(null);
       }
     };
 
     const onWheel = (e) => {
       e.preventDefault();
-      camRadius = Math.max(25, Math.min(450, camRadius + e.deltaY * 0.22));
+      camRadius = Math.max(20, Math.min(320, camRadius + e.deltaY * 0.22));
       updateCam();
     };
 
@@ -326,8 +403,12 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
       if (e.touches.length === 1 && dragging) {
         const tx = e.touches[0].clientX;
         const ty = e.touches[0].clientY;
-        camTheta -= (tx - lastX) * 0.005;
-        camPhi = Math.max(0.12, Math.min(Math.PI - 0.12, camPhi - (ty - lastY) * 0.005));
+        const dTheta = -(tx - lastX) * 0.005;
+        const dPhi   = -(ty - lastY) * 0.005;
+        camTheta += dTheta;
+        camPhi = Math.max(0.12, Math.min(Math.PI - 0.12, camPhi + dPhi));
+        velTheta = dTheta;
+        velPhi   = dPhi;
         updateCam();
         if (Math.abs(tx - touchStartX) > 8 || Math.abs(ty - touchStartY) > 8) touchMoved = true;
         lastX = tx;
@@ -336,7 +417,7 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        camRadius = Math.max(25, Math.min(450, camRadius - (dist - pinchStartDist) * 0.5));
+        camRadius = Math.max(20, Math.min(320, camRadius - (dist - pinchStartDist) * 0.5));
         pinchStartDist = dist;
         updateCam();
       }
@@ -380,7 +461,11 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
     const animate = () => {
       frameId = requestAnimationFrame(animate);
       if (!dragging) {
-        camTheta += 0.00035;
+        // Inertia from the last drag decays out, then gentle auto-rotate
+        velTheta *= 0.94;
+        velPhi   *= 0.94;
+        camTheta += velTheta + 0.00035;
+        camPhi = Math.max(0.12, Math.min(Math.PI - 0.12, camPhi + velPhi));
         updateCam();
       }
       renderer.render(scene, camera);
@@ -401,6 +486,7 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
       renderer.dispose();
       planetGeo.dispose(); planetMat.dispose();
       bgGeo.dispose(); bgMat.dispose();
+      disposables.forEach(d => d.dispose());
       if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
     };
   }, [threeReady, planets]);
@@ -532,7 +618,8 @@ export default function ExoMap({ planets, votedIds, onViewDetail }) {
 
       {/* Bottom note */}
       <div style={{ marginTop: 10, fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(255,255,255,0.42)', textAlign: 'center', letterSpacing: '0.08em', lineHeight: 1.6 }}>
-        Directions are real (RA/Dec). Distances: ~60% measured, ~40% estimated from discovery survey depth (Kepler/TESS/RV etc.).
+        Heliocentric · directions are real (RA/Dec) · radial distance is log-compressed — rings mark 10 / 100 / 1,000 / 10,000 ly.
+        <br/>Distances: ~60% measured, ~40% estimated from discovery survey depth (Kepler/TESS/RV etc.).
       </div>
     </div>
   );
